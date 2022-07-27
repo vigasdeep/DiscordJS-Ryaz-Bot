@@ -9,6 +9,7 @@ const commands = [
 	new SlashCommandBuilder().setName('help').setDescription('Shows commands for bot'),
 	new SlashCommandBuilder().setName('person').setDescription('creates new person (testing)'),
 	new SlashCommandBuilder().setName('addcoins').setDescription('Adds coins to user'),
+	new SlashCommandBuilder().setName('mycoins').setDescription('Shows available coins'),
 ]
 	.map(command => command.toJSON());
 
