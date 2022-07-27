@@ -75,35 +75,62 @@ client.on('interactionCreate', async interaction => {
         await interaction.reply('This is a discord bot made for RYAZ');
     }
     else if (commandName === 'person') {
+        let data = [];
+        data = fs.readFileSync('employee.json').toString()
+        console.log(data);
+        let newObject = JSON.parse(data);
+        console.log(newObject);
+        len = newObject.length
+        let exist = 0;
+        for (let i = 0; i < len; i++) {
 
-        const person = new employee();
-        console.log(person);
-        // await interaction.reply(person.name);
-        person.name = interaction.user.tag;
-        person.availableCoins = 0;
-        person.id = interaction.user.id;
-        // const Person = JSON.stringify(person);
-        info.push(person);
-        fs.writeFileSync('./src/employee.json', JSON.stringify(info), (err) => {
-            if (err) throw err;
-            console.log('The file has been saved!');
-        });
-        const exampleEmbed = new EmbedBuilder()
-            .setColor(0x4ce4b1)
-            .setTitle('My coins')
-            .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
-            .setDescription(`Created new User !`)
-            .addFields(
-                { name: `Name: ${person.name}`, value: `Available Coins:${person.availableCoins}`, inline: true },
-            )
-            .setTimestamp()
-            .setFooter({ text: 'Ryaz DiscordJS Bot' });
+            if (interaction.user.id === newObject[i]['id']) {
+                exist = 1;
+            }
+        
+        }
+        if (exist === 0) {
+            const person = new employee();
+            person.name = interaction.user.tag;
+            person.availableCoins = 0;
+            person.id = interaction.user.id;
+            
+            info.push(person);
+            fs.writeFileSync('employee.json', JSON.stringify(info), (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+            const exampleEmbed = new EmbedBuilder()
+                .setColor(0x4ce4b1)
+                
+                .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                .setDescription(`Created new User !`)
+                .addFields(
+                    { name: `Name: ${person.name}`, value: `Available Coins:${person.availableCoins}`, inline: true },
+                )
+                .setTimestamp()
+                .setFooter({ text: 'Ryaz DiscordJS Bot' });
 
-        interaction.reply({ embeds: [exampleEmbed] });
+            interaction.reply({ embeds: [exampleEmbed] });
+        }else{
+            const exampleEmbed = new EmbedBuilder()
+                .setColor(0xFF0000)
+                
+                .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                 .addFields(
+                    { name: `User Already Exists`, value: `Use /mycoins to see available coins`, inline: true },
+                )
+                .setTimestamp()
+                .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+            interaction.reply({ embeds: [exampleEmbed] });
+        }
+
     }
+
     else if (commandName === 'addcoins') {
         let data = [];
-        data = fs.readFileSync('./src/employee.json').toString()
+        data = fs.readFileSync('employee.json').toString()
         let newObject = JSON.parse(data);
         len = newObject.length
         for (let i = 0; i < len; i++) {
@@ -125,7 +152,7 @@ client.on('interactionCreate', async interaction => {
 
                 interaction.reply({ embeds: [exampleEmbed] });
                 const updatedPerson = JSON.stringify(newObject);
-                fs.writeFileSync('./src/employee.json', updatedPerson, (err) => {
+                fs.writeFileSync('employee.json', updatedPerson, (err) => {
                     if (err) throw err;
                     console.log('The file has been saved!');
                 });
@@ -135,7 +162,7 @@ client.on('interactionCreate', async interaction => {
 
     } else if (commandName === 'mycoins') {
         let data = [];
-        data = fs.readFileSync('./src/employee.json').toString()
+        data = fs.readFileSync('employee.json').toString()
         let newObject = JSON.parse(data);
         len = newObject.length
         for (let i = 0; i < len; i++) {
@@ -153,7 +180,7 @@ client.on('interactionCreate', async interaction => {
                 interaction.reply({ embeds: [exampleEmbed] });
 
                 const updatedPerson = JSON.stringify(newObject);
-                fs.writeFileSync('./src/employee.json', updatedPerson, (err) => {
+                fs.writeFileSync('employee.json', updatedPerson, (err) => {
                     if (err) throw err;
                     console.log('The file has been saved!');
                 });
