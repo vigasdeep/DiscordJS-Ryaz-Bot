@@ -65,6 +65,7 @@ client.on('interactionCreate', async interaction => {
                 { name: '/person', value: `Creates user and Coin wallet`, inline: true },
                 { name: '/addcoin', value: `Adds 5 coins to user`, inline: true },
                 { name: '/mycoins', value: `Shows Available Coins`, inline: true },
+                { name: '/sendCoins', value: `Transfer your coins to other user`, inline: true },
             )
             .setTimestamp()
             .setFooter({ text: 'Ryaz DiscordJS Bot' });
@@ -92,7 +93,7 @@ client.on('interactionCreate', async interaction => {
         if (exist === 0) {
             const person = new employee();
             person.name = interaction.user.tag;
-            person.availableCoins = 0;
+            person.availableCoins = 10;
             person.id = interaction.user.id;
 
             info.push(person);

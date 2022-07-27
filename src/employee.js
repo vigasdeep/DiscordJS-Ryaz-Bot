@@ -2,7 +2,7 @@
 
 function employee(){
     this.name = "Name";
-    this.availableCoins = 0;
+    this.availableCoins = 10;
     this.updateCoins = function(coins){
         this.availableCoins = coins;
     }
