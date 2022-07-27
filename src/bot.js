@@ -3,43 +3,75 @@ require('dotenv').config();
 const fs = require('fs');
 const employee = require('./employee');
 const { EmbedBuilder } = require('discord.js');
-const { Client, GatewayIntentBits } = require('discord.js') //importing discord.js
-// Client interacts with discord API
+const { Client, GatewayIntentBits } = require('discord.js')
 
-
-//The GatewayIntentBits.Guilds intents option is necessary for your client to work properly.
-//Since new updated of discord.js like version ^13.0 you have to specify client intents
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        // GatewayIntentBits.GuildMessages,
-        // GatewayIntentBits.MessageContent,
     ],
-}); // client(bot) is the instance of Client class
+});
 let info = [];
 client.once('ready', () => {
     console.log(`${client.user.tag} has logged in.`);
-    // let data = fs.readFileSync('./src/employee.json').toString();
-    // info.push(data);
-    // console.log(info);
+
 });
-
-
 
 client.on('interactionCreate', async interaction => {
 
     const { commandName } = interaction;
     console.log(interaction);
-    if (commandName === 'hello') {
-        await interaction.reply('hey !');
-    }
-    else if (commandName === 'ping') {
-        await interaction.reply('Pong!');
+    if (commandName === 'ping') {
+        // await interaction.reply(`API Latency is ${Math.round(client.ws.ping)}ms`);
+
+        const exampleEmbed = new EmbedBuilder()
+            .setColor(0x4ce4b1)
+            .setTitle('Ping')
+            .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+            .addFields(
+                { name: 'API Latency', value: `${Math.round(client.ws.ping)}ms`, inline: true },
+            )
+            .setTimestamp()
+            .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+        interaction.reply({ embeds: [exampleEmbed] });
+
     } else if (commandName === 'server') {
-        await interaction.reply(`Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`);
+
+        const exampleEmbed = new EmbedBuilder()
+            .setColor(0x4ce4b1)
+            .setTitle('Server Info')
+            .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+            .addFields(
+                { name: 'Total members', value: `${interaction.guild.memberCount}`, inline: true },
+            )
+            .setTimestamp()
+            .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+        interaction.reply({ embeds: [exampleEmbed] });
+
     } else if (commandName === 'user') {
         await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
+
     } else if (commandName === 'help') {
+        const exampleEmbed = new EmbedBuilder()
+            .setColor(0x4ce4b1)
+            .setTitle('Help')
+            .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+            // .setDescription(`Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`)
+            .addFields(
+                { name: '/ping', value: `Shows API Latency`, inline: true },
+                { name: '/server', value: `Shows Server Info`, inline: true },
+                { name: '/help', value: `Shows Commands for Ryaz Bot`, inline: true },
+                { name: '/person', value: `Creates user and Coin wallet`, inline: true },
+                { name: '/addcoin', value: `Adds 5 coins to user`, inline: true },
+                { name: '/mycoins', value: `Shows Available Coins`, inline: true },
+            )
+            .setTimestamp()
+            .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+        interaction.reply({ embeds: [exampleEmbed] });
+
+
         await interaction.reply('This is a discord bot made for RYAZ');
     }
     else if (commandName === 'person') {
@@ -57,14 +89,17 @@ client.on('interactionCreate', async interaction => {
             console.log('The file has been saved!');
         });
         const exampleEmbed = new EmbedBuilder()
-        .setColor(0x4ce4b1)
-        .setTitle('My coins')
-        .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
-        .setDescription(`Created new User\nName: ${person.name} \nAvailable Coins: ${person.availableCoins}`)
-        .setTimestamp()
-        .setFooter({ text: 'Ryaz DiscordJS Bot' });
+            .setColor(0x4ce4b1)
+            .setTitle('My coins')
+            .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+            .setDescription(`Created new User !`)
+            .addFields(
+                { name: `Name: ${person.name}`, value: `Available Coins:${person.availableCoins}`, inline: true },
+            )
+            .setTimestamp()
+            .setFooter({ text: 'Ryaz DiscordJS Bot' });
 
-    interaction.reply({ embeds: [exampleEmbed] });
+        interaction.reply({ embeds: [exampleEmbed] });
     }
     else if (commandName === 'addcoins') {
         let data = [];
@@ -80,8 +115,11 @@ client.on('interactionCreate', async interaction => {
                 const exampleEmbed = new EmbedBuilder()
                     .setColor(0x4ce4b1)
                     .setTitle('My coins')
-                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240'})
-                    .setDescription(`Name: ${newObject[i]['name']}\nAdded 5 Coins\nAvailable Coins: ${newObject[i]['availableCoins']}`)
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`Added 5 Coins`)
+                    .addFields(
+                        { name: `Name: ${newObject[i]['name']}`, value: `Available Coins: ${newObject[i]['availableCoins']}`, inline: true },
+                    )
                     .setTimestamp()
                     .setFooter({ text: 'Ryaz DiscordJS Bot' });
 
@@ -106,7 +144,9 @@ client.on('interactionCreate', async interaction => {
                     .setColor(0x4ce4b1)
                     .setTitle('My coins')
                     .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
-                    .setDescription(`Name: ${newObject[i]['name']}\nAvailable Coins: ${newObject[i]['availableCoins']}`)
+                    .addFields(
+                        { name: `Name: ${newObject[i]['name']}`, value: `Available Coins: ${newObject[i]['availableCoins']}`, inline: true },
+                    )
                     .setTimestamp()
                     .setFooter({ text: 'Ryaz DiscordJS Bot' });
 
