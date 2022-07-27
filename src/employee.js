@@ -2,7 +2,12 @@
 
 function employee(){
     this.name = "Name";
-    availableCoins = 0;
+    this.availableCoins = 0;
+    this.updateInfo = function(name,coins){
+        this.name = name;
+        this.availableCoins = coins;
+    }
+
 }
 
 module.exports = employee 

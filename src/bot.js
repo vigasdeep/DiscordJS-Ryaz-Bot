@@ -20,6 +20,7 @@ client.once('ready', () => {
 	console.log(`${client.user.tag} has logged in.`);
 });
 
+// let array = [];
 
 client.on('interactionCreate', async interaction => {
 	    
@@ -42,12 +43,31 @@ client.on('interactionCreate', async interaction => {
         // await interaction.reply(person.name);
         person.name = interaction.user.tag;
         person.availableCoins = 0;
+        // array.push(person);
         const Person = JSON.stringify(person);
         fs.writeFile('./src/employee.json',Person,(err) => {
-            // if (err) throw err;
+            if (err) throw err;
             console.log('The file has been saved!');
           });
         await interaction.reply(`Person Created. Name: ${person.name} and Available Coins : ${person.availableCoins}`);
+    }
+    else if (commandName === 'addcoins'){
+        // let info = [];
+        let data = fs.readFileSync('./src/employee.json').toString()
+        console.log("DATA FROM FILE ", data);
+        // info.push(data.toString());
+        let newObject = JSON.parse(data);
+        let Person = new employee();
+        Person.updateInfo(newObject['name'],newObject['availableCoins']);
+        console.log("THIS IS NEW DATA: ",Person);
+       
+        Person.availableCoins+=5;
+        await interaction.reply(`5 Coins added to ${Person.name} \n Now Available Coins : ${Person.availableCoins}`);
+        const updatedPerson = JSON.stringify(Person);
+        fs.writeFile('./src/employee.json',updatedPerson,(err) => {
+            if (err) throw err;
+            console.log('The file has been saved!');
+          });
     }
 });
 
