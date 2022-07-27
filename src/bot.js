@@ -1,7 +1,7 @@
 require('dotenv').config();
 
-//console.log(process.env.DISCORD_BOT_TOKEN);
-
+const fs = require('fs')
+const employee = require('./employee')
 const { Client,  GatewayIntentBits } = require('discord.js') //importing discord.js
 // Client interacts with discord API
 
@@ -36,17 +36,20 @@ client.on('interactionCreate', async interaction => {
 		await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
 	} else if (commandName === 'help'){
         await interaction.reply('This is a discord bot made for RYAZ');
-    } else if (commandName === 'person'){
-        await interaction.reply('Let');
+    } 
+    else if (commandName === 'person'){
+        const person = new employee();
+        // await interaction.reply(person.name);
+        person.name = interaction.user.tag;
+        person.availableCoins = 0;
+        const Person = JSON.stringify(person);
+        fs.writeFile('./src/employee.json',Person,(err) => {
+            // if (err) throw err;
+            console.log('The file has been saved!');
+          });
+        await interaction.reply(`Person Created. Name: ${person.name} and Available Coins : ${person.availableCoins}`);
     }
 });
-
-// client.on('messageCreate', (message)  =>{
-//     console.log(message.content);
-// })
-
-
-
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
