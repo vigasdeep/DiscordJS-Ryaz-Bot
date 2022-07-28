@@ -2,12 +2,12 @@
   "837281081634979861": {
     "name": "Harsh Zode",
     "id": "837281081634979861",
-    "availableCoins": 95,
+    "availableCoins": 43,
     "coinsSent": {
       "Ryaz bot": {
         "recipientName": "Ryaz bot",
         "recipientId": "999889194681901169",
-        "amountTransfered": 5
+        "amountTransfered": 1
       }
     },
     "coinsRecieved": {}
@@ -15,13 +15,13 @@
   "999889194681901169": {
     "name": "Ryaz bot",
     "id": "999889194681901169",
-    "availableCoins": 125,
+    "availableCoins": 177,
     "coinsSent": {},
     "coinsRecieved": {
       "Harsh Zode": {
         "senderName": "Harsh Zode",
         "senderId": "837281081634979861",
-        "amountTransfered": 5
+        "amountTransfered": 1
       }
     }
   }

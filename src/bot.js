@@ -312,8 +312,8 @@ client.on('interactionCreate', async interaction => {
         recivingUser.availableCoins = recivingUser.availableCoins + amountToTransfer;
         console.log(newPerson.availableCoins);
         console.log(recivingUser.availableCoins);
-        saveUser(newPerson);
-        saveUser(recivingUser);
+        // saveUser(newPerson);
+        // saveUser(recivingUser);
 
         reciept = new coinTransferLog(newPerson.name, newPerson.id, recivingUser.name, recivingUser.id, amountToTransfer);
         SenderLogs(reciept);
