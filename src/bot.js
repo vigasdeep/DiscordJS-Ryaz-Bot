@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const fs = require('fs');
 const employee = require('./employee');
+const { person, saveUser, log, coinTransferLog, SenderLogs, ReceiverLogs } = require('./createEmployee');
 const { EmbedBuilder } = require('discord.js');
 const { Client, GatewayIntentBits } = require('discord.js')
 
@@ -127,9 +128,7 @@ client.on('interactionCreate', async interaction => {
             interaction.reply({ embeds: [exampleEmbed] });
         }
 
-    }
-
-    else if (commandName === 'addcoins') {
+    } else if (commandName === 'addcoins') {
         let data = [];
         data = fs.readFileSync('employee.json').toString()
         let newObject = JSON.parse(data);
@@ -204,7 +203,7 @@ client.on('interactionCreate', async interaction => {
             interaction.reply({ embeds: [exampleEmbed] });
             return;
         } else if (amountToTransfer < 0) {
-           
+
             const exampleEmbed = new EmbedBuilder()
                 .setColor(0xFF0000)
                 .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
@@ -240,7 +239,7 @@ client.on('interactionCreate', async interaction => {
 
         }
         if (exist === 1 && userExist === 1) {
-            
+
             if (newObject[mindex]['availableCoins'] < amountToTransfer) {
                 interaction.reply("You don't have enough coins");
 
@@ -266,7 +265,7 @@ client.on('interactionCreate', async interaction => {
                         )
                         .setTimestamp()
                         .setFooter({ text: 'Ryaz DiscordJS Bot' });
-                        interaction.reply({ embeds: [exampleEmbed] });
+                    interaction.reply({ embeds: [exampleEmbed] });
                 } else {
                     const exampleEmbed = new EmbedBuilder()
                         .setColor(0x4ce4b1)
@@ -278,11 +277,11 @@ client.on('interactionCreate', async interaction => {
                         )
                         .setTimestamp()
                         .setFooter({ text: 'Ryaz DiscordJS Bot' });
-                        interaction.reply({ embeds: [exampleEmbed] });
+                    interaction.reply({ embeds: [exampleEmbed] });
 
                 }
 
-                
+
             }
         } else if (exist == 0) {
             interaction.reply("You do not have a wallet");
@@ -291,6 +290,47 @@ client.on('interactionCreate', async interaction => {
         } else {
             interaction.reply("Something went wrong");
         }
+    }
+    else if (commandName === 'newperson') {
+        user = new person();
+        user.name = interaction.user.username;
+        user.id = interaction.user.id;
+        saveUser(user);
+        console.log(user);
+        interaction.reply("Done");
+    }
+    else if (commandName === 'newsendcoins') {
+        userId = interaction.options.get('user').value;
+        amountToTransfer = interaction.options.get('coins').value;
+        const data = JSON.parse(fs.readFileSync('data.json'));
+        newPerson = data[interaction.user.id];
+        recivingUser = data[userId];
+        console.log(newPerson.id);
+        console.log(recivingUser.id);
+
+        newPerson.availableCoins = newPerson.availableCoins - amountToTransfer;
+        recivingUser.availableCoins = recivingUser.availableCoins + amountToTransfer;
+        console.log(newPerson.availableCoins);
+        console.log(recivingUser.availableCoins);
+        saveUser(newPerson);
+        saveUser(recivingUser);
+
+        reciept = new coinTransferLog(newPerson.name, newPerson.id, recivingUser.name, recivingUser.id, amountToTransfer);
+        SenderLogs(reciept);
+        ReceiverLogs(reciept);
+        console.log(newPerson);
+        //  interaction.reply("check logs");
+        const exampleEmbed = new EmbedBuilder()
+            .setColor(0x4ce4b1)
+            .setTitle('Coins Transfered !')
+            .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+            .setDescription(`${newPerson.name}`)
+            .addFields(
+                { name: `Transfered ${amountToTransfer} coin to ${recivingUser.name}`, value: `Your available coins : ${newPerson.availableCoins}`, inline: true },
+            )
+            .setTimestamp()
+            .setFooter({ text: 'Ryaz DiscordJS Bot' });
+        interaction.reply({ embeds: [exampleEmbed] });
     }
 });
 
