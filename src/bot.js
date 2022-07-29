@@ -332,6 +332,108 @@ client.on('interactionCreate', async interaction => {
             .setTimestamp()
             .setFooter({ text: 'Ryaz DiscordJS Bot' });
         interaction.reply({ embeds: [exampleEmbed] });
+    } else if (commandName === 'showhistory') {
+        let data = [];
+        data = fs.readFileSync('employee.json').toString()
+        let newObject = JSON.parse(data);
+        len = newObject.length
+        myId = interaction.user.id;
+        for (let i = 0; i < len; i++) {
+            if (myId === newObject[i]['id']) {
+                exist = 1;
+                myindex = i;
+            }
+        }
+        if (exist === 1) {
+
+            SentInfo = newObject[myindex]['sentLog']
+            RecieveInfo = newObject[myindex]['recieveLog']
+            function showThis(arr) {
+                len = arr.length;
+                console.log(len)
+                if (len === 0) {
+                    let char = 'none';
+                    return char;
+                }
+                else {
+                    return arr;
+                }
+
+            }
+            if (SentInfo.length <= 0 && RecieveInfo.length <=0) {
+                const exampleEmbed = new EmbedBuilder()
+                    .setColor(0x4ce4b1)
+                    .setTitle('Coins Transfer History !')
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`${newObject[myindex]['name']}\nNo coins Transfered`)
+                    .setTimestamp()
+                    .setFooter({ text: 'Ryaz DiscordJS Bot' });
+                const recieveEmbed = new EmbedBuilder()
+                    .setColor(0x4ce4b1)
+                    .setTitle('Coins Recieve History !')
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`${newObject[myindex]['name']}\nNo coins recieved`)
+                    .setTimestamp()
+                    .setFooter({ text: 'Ryaz DiscordJS Bot' });
+                interaction.reply({ embeds: [exampleEmbed, recieveEmbed] });
+            }
+            else if(SentInfo.length > 0 && RecieveInfo.length ==0){
+                const exampleEmbed = new EmbedBuilder()
+                    .setColor(0x4ce4b1)
+                    .setTitle('Coins Transfer History !')
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`${newObject[myindex]['name']}\n${SentInfo.map(showThis).join('\n')}`)
+                    .setTimestamp()
+                    .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+                const recieveEmbed = new EmbedBuilder()
+                    .setColor(0x4ce4b1)
+                    .setTitle('Coins Recieve History !')
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`${newObject[myindex]['name']}\nNo coins recieved`)
+                    .setTimestamp()
+                    .setFooter({ text: 'Ryaz DiscordJS Bot' });
+                interaction.reply({ embeds: [exampleEmbed, recieveEmbed] });
+            }
+            else if (SentInfo.length == 0 && RecieveInfo.length > 0) {
+                const exampleEmbed = new EmbedBuilder()
+                .setColor(0x4ce4b1)
+                .setTitle('Coins Transfer History !')
+                .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                .setDescription(`${newObject[myindex]['name']}\nNo coins Transfered`)
+                .setTimestamp()
+                .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+            const recieveEmbed = new EmbedBuilder()
+                .setColor(0x4ce4b1)
+                .setTitle('Coins Recieve History !')
+                .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                .setDescription(`${newObject[myindex]['name']}\n${RecieveInfo.map(showThis).join('\n')}`)
+                .setTimestamp()
+                .setFooter({ text: 'Ryaz DiscordJS Bot' });
+            interaction.reply({ embeds: [exampleEmbed, recieveEmbed] });
+            }
+            else {
+                const exampleEmbed = new EmbedBuilder()
+                    .setColor(0x4ce4b1)
+                    .setTitle('Coins Transfer History !')
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`${newObject[myindex]['name']}\n${SentInfo.map(showThis).join('\n')}`)
+                    .setTimestamp()
+                    .setFooter({ text: 'Ryaz DiscordJS Bot' });
+
+                const recieveEmbed = new EmbedBuilder()
+                    .setColor(0x4ce4b1)
+                    .setTitle('Coins Recieve History !')
+                    .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+                    .setDescription(`${newObject[myindex]['name']}\n${RecieveInfo.map(showThis).join('\n')}`)
+                    .setTimestamp()
+                    .setFooter({ text: 'Ryaz DiscordJS Bot' });
+                interaction.reply({ embeds: [exampleEmbed, recieveEmbed] });
+            }
+
+            // interaction.reply(`${SentInfo}`);
+        }
     }
 });
 

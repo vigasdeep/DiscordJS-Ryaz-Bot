@@ -16,7 +16,8 @@ const commands = [
 	new SlashCommandBuilder().setName('newperson').setDescription('New command to save user in JSON(testing)'),
 	new SlashCommandBuilder().setName('newsendcoins').setDescription('New command to send coins to user and add logs in JSON(testing)')
 	.addUserOption(option => option.setName('user').setDescription('Select a user').setRequired(true))
-	.addIntegerOption(option => option.setName('coins').setDescription('Enter an integer').setRequired(true)),	
+	.addIntegerOption(option => option.setName('coins').setDescription('Enter an integer').setRequired(true)),
+	new SlashCommandBuilder().setName('showhistory').setDescription('Shows coin transfer history')	
 ]
 	.map(command => command.toJSON());
 
