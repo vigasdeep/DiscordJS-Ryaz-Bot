@@ -63,7 +63,7 @@ client.on('interactionCreate', async interaction => {
                 { name: '/ping', value: `Shows API Latency`, inline: true },
                 { name: '/server', value: `Shows Server Info`, inline: true },
                 { name: '/help', value: `Shows Commands for Ryaz Bot`, inline: true },
-                { name: '/person', value: `Creates user and Coin wallet`, inline: true },
+                { name: '/createwallet', value: `Creates user and Coin wallet`, inline: true },
                 { name: '/addcoin', value: `Adds 5 coins to user`, inline: true },
                 { name: '/mycoins', value: `Shows Available Coins`, inline: true },
                 { name: '/sendCoins', value: `Transfer your coins to other user`, inline: true },
@@ -76,7 +76,7 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.reply('This is a discord bot made for RYAZ');
     }
-    else if (commandName === 'person') {
+    else if (commandName === 'createWallet') {
         let data = [];
         data = fs.readFileSync('employee.json').toString()
         console.log(data);
@@ -187,10 +187,10 @@ client.on('interactionCreate', async interaction => {
             }
         }
     } else if (commandName === 'sendcoins') {
-        console.log(interaction.options.get('target').value);
+        console.log(interaction.options.get('user').value);
         console.log(interaction.options.get('int').value);
         myId = interaction.user.id;
-        userId = interaction.options.get('target').value;
+        userId = interaction.options.get('user').value;
         amountToTransfer = interaction.options.get('int').value;
         if (amountToTransfer == 0) {
             const exampleEmbed = new EmbedBuilder()
@@ -219,7 +219,6 @@ client.on('interactionCreate', async interaction => {
         let newObject = JSON.parse(data);
         len = newObject.length
         let mindex = 0;
-
         let exist = 0;
         userExist = 0;
         for (let i = 0; i < len; i++) {
@@ -246,7 +245,9 @@ client.on('interactionCreate', async interaction => {
             }
             else {
                 newObject[uindex]['availableCoins'] += amountToTransfer;
+                newObject[uindex]['recieveLog'].push(`Recieved ${amountToTransfer} coins from ${newObject[mindex]['name']}`);
                 newObject[mindex]['availableCoins'] -= amountToTransfer;
+                newObject[mindex]['sentLog'].push(`Transfered ${amountToTransfer} coins to ${newObject[uindex]['name']}`);
                 // interaction.reply(`coins transfered!\n${newObject[uindex]['name']} now has ${newObject[uindex]['availableCoins']}`)
 
                 const updatedPerson = JSON.stringify(newObject);

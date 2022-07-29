@@ -7,11 +7,11 @@ const commands = [
 	new SlashCommandBuilder().setName('server').setDescription('Replies with server info!'),
 	new SlashCommandBuilder().setName('user').setDescription('Replies with user info!'),
 	new SlashCommandBuilder().setName('help').setDescription('Shows commands for bot'),
-	new SlashCommandBuilder().setName('person').setDescription('creates new person (testing)'),
+	new SlashCommandBuilder().setName('createwallet').setDescription('Creates wallet to store coins'),
 	new SlashCommandBuilder().setName('addcoins').setDescription('Adds coins to user'),
 	new SlashCommandBuilder().setName('mycoins').setDescription('Shows available coins'),
 	new SlashCommandBuilder().setName('sendcoins').setDescription('Transfer your coins to other user')
-	.addUserOption(option => option.setName('target').setDescription('Select a user').setRequired(true))
+	.addUserOption(option => option.setName('user').setDescription('Select a user').setRequired(true))
 	.addIntegerOption(option => option.setName('int').setDescription('Enter an integer').setRequired(true)),
 	new SlashCommandBuilder().setName('newperson').setDescription('New command to save user in JSON(testing)'),
 	new SlashCommandBuilder().setName('newsendcoins').setDescription('New command to send coins to user and add logs in JSON(testing)')
