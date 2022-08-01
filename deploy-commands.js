@@ -17,7 +17,13 @@ const commands = [
 	new SlashCommandBuilder().setName('newsendcoins').setDescription('New command to send coins to user and add logs in JSON(testing)')
 	.addUserOption(option => option.setName('user').setDescription('Select a user').setRequired(true))
 	.addIntegerOption(option => option.setName('coins').setDescription('Enter an integer').setRequired(true)),
-	new SlashCommandBuilder().setName('showhistory').setDescription('Shows coin transfer history')	
+	new SlashCommandBuilder().setName('showhistory').setDescription('Shows coin transfer history'),
+	new SlashCommandBuilder().setName('introduce').setDescription('Introduce yourself to Ryaz')
+	.addStringOption(option => option.setName('name').setDescription('Enter your name').setRequired(true))
+	.addStringOption(option => option.setName('email').setDescription('Enter your email address').setRequired(true))
+	.addIntegerOption(option => option.setName('phonenumber').setDescription('Enter your phone number').setRequired(true))
+	.addStringOption(option => option.setName('introduction').setDescription('Introduce yourself').setRequired(true)),
+		
 ]
 	.map(command => command.toJSON());
 
