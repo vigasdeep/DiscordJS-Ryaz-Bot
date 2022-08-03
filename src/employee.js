@@ -2,7 +2,7 @@
 
 function employee(){
     this.name = "Name";
-    this.availableCoins = 10;
+    this.availableCoins = 0;
     this.sentLog = [];
     this.recieveLog = [];
     this.updateCoins = function(coins){
