@@ -1,11 +1,12 @@
 require('dotenv').config();
 
 const fs = require('fs');
+const { PermissionToAddCoins,commonRole } = require('./config.json');
 const employee = require('./employee');
 const {responseCommand,embedCommand} = require('./embed');
 const {createIntroduction} = require('./introduction')
 const { EmbedBuilder } = require('discord.js');
-const { Client, GatewayIntentBits } = require('discord.js')
+const { Client, GatewayIntentBits } = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -37,10 +38,9 @@ client.on('interactionCreate', async interaction => {
             const fields = [{ name: '/ping', value: `Shows API Latency`, inline: true },
             { name: '/server', value: `Shows Server Info`, inline: true },
             { name: '/help', value: `Shows Commands for Ryaz Bot`, inline: true },
+            { name: '/addcoins', value: `Addes coins to user or\nuser having specific role`, inline: true },
             { name: '/createwallet', value: `Creates user and Coin wallet`, inline: true },
-            { name: '/addcoin', value: `Adds 5 coins to user`, inline: true },
-            { name: '/mycoins', value: `Shows Available Coins`, inline: true },
-            { name: '/sendCoins', value: `Transfer your coins to other user`, inline: true }]
+            { name: '/mycoins', value: `Shows Available Coins`, inline: true }]
             const description = `Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`
             responseCommand(interaction, 'Help', fields, description, false);
             break;
@@ -48,9 +48,7 @@ client.on('interactionCreate', async interaction => {
         case 'createwallet': {
             let data = [];
             data = fs.readFileSync('employee.json').toString()
-            console.log(data);
             let newObject = JSON.parse(data);
-            console.log(newObject);
             len = newObject.length
             let exist = 0;
             for (let i = 0; i < len; i++) {
@@ -72,38 +70,80 @@ client.on('interactionCreate', async interaction => {
                 });
                 const description = `Created new User !`
                 const fields = [{ name: `Name: ${person.name}`, value: `Available Coins:${person.availableCoins}`, inline: true}]
-                responseCommand(interaction,null,description,fields,false)
+                // responseCommand(interaction,null,description,fields,true)
+                const message =embedCommand('Create wallet command',fields,description);
+                interaction.reply({ embeds: [message], ephemeral: true });
             } else {  
                 const fields =  [{ name: `User Already Exists`, value: `Use /mycoins to see available coins`, inline: true }]
-                responseCommand(interaction,null,null,fields,false);
+                // responseCommand(interaction,null,null,fields,false);
+                const message =embedCommand('Create wallet command',fields,null);
+                interaction.reply({ embeds: [message], ephemeral: true });
             }
             break;
         }
         case 'addcoins':{
-        let info = [];
-        info = fs.readFileSync('employee.json').toString()
-        let newInfo = JSON.parse(info);
-        len = newInfo.length
-        for (let i = 0; i < len; i++) {
-
-            if (interaction.user.id === newInfo[i]['id']) {
-                console.log(newInfo[i]['name']);
-                newInfo[i]['availableCoins'] += 5;
-                
-                 const description = `Added 5 Coins`
-                 const fields =[{ name: `Name: ${newInfo[i]['name']}`, value: `Available Coins: ${newInfo[i]['availableCoins']}`, inline: true }]
-                        
-                responseCommand(interaction,`Add coins`, fields,description,true)
-                    
-                const updatedPerson = JSON.stringify(newInfo);
-                    fs.writeFileSync('employee.json', updatedPerson, (err) => {
-                        if (err) throw err;
-                        console.log('The file has been saved!');
-                    });
-                }
-
+        if(interaction.user.id != PermissionToAddCoins){
+            const description = `You don't have permission to use this command`
+            const message = embedCommand('Add Coins Command',null,description);
+            interaction.reply({ embeds: [message], ephemeral: true });
+        }
+        else{
+            let info = [];
+            info = fs.readFileSync('employee.json').toString()
+            let newInfo = JSON.parse(info);
+            len = newInfo.length
+            let role = null;
+            let user = null;
+            amount = interaction.options.get('amount').value;
+            if(amount<=0){
+                const description = `Amount must be positive`
+                const message = embedCommand('Add Coins Command',null,description);
+                interaction.reply({ embeds: [message], ephemeral: true });
+                return;
             }
-            break;
+            if(interaction.options.get('role') !== null){
+                role = interaction.options.get('role').id;
+            }
+            if(interaction.options.get('user')!== null){
+                console.log(interaction.options.get('user'))
+                user  = interaction.options.get('user').value;
+            }
+            id = 0;
+            if(user !== null){
+                for(let i = 0; i<len; i++){
+                    if (newInfo[i]['id']== user){
+                        newInfo[i]['availableCoins'] += amount;
+                        const description = `Added ${amount} to ${newInfo[i]['name']} `
+                        const updatedPerson = JSON.stringify(newInfo);
+                        fs.writeFileSync('employee.json', updatedPerson, (err) => {
+                            if (err) throw err;
+                            console.log('The file has been saved!');
+                        });
+        
+                        const message = embedCommand('Add Coins Command',null,description);
+                        interaction.reply({ embeds: [message], ephemeral: true });
+                    }
+                }
+            } else if (role !== null){
+                let coinAdded = [];
+                for(let x in newInfo){
+                    member = interaction.guild.members.cache.get(newInfo[x]['id'])
+                    if (member.roles.cache.has(commonRole)){
+                        newInfo[x]['availableCoins'] += amount;
+                        coinAdded.push({ name : `Added ${amount} to`, value:`${newInfo[x]['name']}`, inline: true})
+                    }
+                }
+                const updatedPerson = JSON.stringify(newInfo);
+                fs.writeFileSync('employee.json', updatedPerson, (err) => {
+                    if (err) throw err;
+                    console.log('The file has been saved!');
+                });
+                const message = embedCommand('Add Coins Command',coinAdded,null);
+                interaction.reply({ embeds: [message], ephemeral: true });
+            }
+        }
+        
+         break;
         }
             
         case 'mycoins': {
@@ -123,14 +163,20 @@ client.on('interactionCreate', async interaction => {
         case 'sendcoins': {
             myId = interaction.user.id;
             userId = interaction.options.get('user').value;
-            amountToTransfer = interaction.options.get('int').value;
+            amountToTransfer = interaction.options.get('amount').value;
+            reason = interaction.options.get('reason').value;
+            if (myId === userId){
+                const title = 'You cannot send coins to yourself'
+                responseCommand(interaction,title,null,null,true);
+                return;
+            }
             if (amountToTransfer == 0) {
                 const title = "Amount must be non-zero and positive" 
-                responseCommand(interaction,title,null,null,false);
+                responseCommand(interaction,title,null,null,tre);
                 return;
             } else if (amountToTransfer < 0) {
             const title = "Amount should be positive integer"
-            responseCommand(interaction,title,null,null,false);
+            responseCommand(interaction,title,null,null,true);
                 return;
             }
             let data = [];
@@ -160,23 +206,29 @@ client.on('interactionCreate', async interaction => {
                 }
                 else {
                     newObject[uindex]['availableCoins'] += amountToTransfer;
-                    newObject[uindex]['recieveLog'].push(`Recieved ${amountToTransfer} coins from ${newObject[mindex]['name']}`);
+                    newObject[uindex]['recieveLog'].push(`Recieved ${amountToTransfer} coins from ${newObject[mindex]['name']}. Reason : ${reason}`);
                     newObject[mindex]['availableCoins'] -= amountToTransfer;
-                    newObject[mindex]['sentLog'].push(`Transfered ${amountToTransfer} coins to ${newObject[uindex]['name']}`);
+                    newObject[mindex]['sentLog'].push(`Transfered ${amountToTransfer} coins to ${newObject[uindex]['name']}. Reason : ${reason}`);
                     const updatedPerson = JSON.stringify(newObject);
                     fs.writeFileSync('employee.json', updatedPerson, (err) => {
                         if (err) throw err;
                         console.log('The file has been saved!');
                     });
                     if (amountToTransfer == 1) {
-                        const description = `${newObject[mindex]['name']}`
-                        const fields = [{ name: `Transfered ${amountToTransfer} coin to ${newObject[uindex]['name']}`, value: `Your available coins : ${newObject[mindex]['availableCoins']}`, inline: true }]
+                        senderid = newObject[mindex]['id']
+                        recieverid = newObject[uindex]['id']
+                        const description = `<@${senderid}> `+`transfered **${amountToTransfer} coin** to `+`<@${recieverid}>\n**Reason** : ${reason}`
+                        
                        responseCommand(interaction,'Coin Transfered !',fields,description,false)
+                       interaction.channel.send(`<@${PermissionToAddCoins}>`);
                     } else {
                             const title = 'Coins Transfered !'
-                            const description = `${newObject[mindex]['name']}`
-                            const fields = [{ name: `Transfered ${amountToTransfer} coins to ${newObject[uindex]['name']}`, value: `Your available coins : ${newObject[mindex]['availableCoins']}`, inline: true }]
-                            responseCommand(interaction,title,fields,description,false)
+                            senderid = newObject[mindex]['id']
+                            recieverid = newObject[uindex]['id']
+                            const description = `<@${senderid}> `+`transfered **${amountToTransfer} coins** to `+`<@${recieverid}>\n**Reason** : ${reason}`
+                            
+                            responseCommand(interaction,title,null,description,false)
+                            interaction.channel.send(`<@${PermissionToAddCoins}>`);
                     }
 
 
@@ -272,7 +324,7 @@ client.on('interactionCreate', async interaction => {
             break;
     case 'introduce':
             {
-                const userInfo = new createIntroduction;
+                const userInfo = new createIntroduction();
                 userInfo.id = interaction.user.id;
                 userInfo.name = interaction.options.get('name').value;
                 userInfo.email = interaction.options.get('email');
