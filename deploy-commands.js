@@ -23,12 +23,11 @@ const commands = [
 	.addStringOption(option => option.setName('reason').setDescription('Enter your reason here').setRequired(true)),
 	
 	new SlashCommandBuilder().setName('showhistory').setDescription('Shows coin transfer history'),
-	
+
 	new SlashCommandBuilder().setName('introduce').setDescription('Introduce yourself to Ryaz')
-	.addStringOption(option => option.setName('name').setDescription('Enter your name').setRequired(true))
-	.addStringOption(option => option.setName('email').setDescription('Enter your email address').setRequired(true))
-	.addIntegerOption(option => option.setName('phonenumber').setDescription('Enter your phone number').setRequired(true))
-	.addStringOption(option => option.setName('introduction').setDescription('Introduce yourself').setRequired(true)),
+	// .addStringOption(option => option.setName('name').setDescription('Enter your name').setRequired(true))
+	// .addStringOption(option => option.setName('email').setDescription('Enter your email address').setRequired(true))
+	// .addStringOption(option => option.setName('introduction').setDescription('Introduce yourself').setRequired(true)),
 		
 ]
 	.map(command => command.toJSON());

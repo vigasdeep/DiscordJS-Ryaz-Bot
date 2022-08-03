@@ -63,8 +63,8 @@ client.on('interactionCreate', async interaction => {
                 person.name = interaction.user.tag;
                 person.availableCoins = 10;
                 person.id = interaction.user.id;
-                info.push(person);
-                fs.writeFileSync('employee.json', JSON.stringify(info), (err) => {
+                newObject.push(person);
+                fs.writeFileSync('employee.json', JSON.stringify(newObject), (err) => {
                     if (err) throw err;
                     console.log('The file has been saved!');
                 });
@@ -325,11 +325,7 @@ client.on('interactionCreate', async interaction => {
     case 'introduce':
             {
                 const userInfo = new createIntroduction();
-                userInfo.id = interaction.user.id;
-                userInfo.name = interaction.options.get('name').value;
-                userInfo.email = interaction.options.get('email');
-                userInfo.phonenumber = interaction.options.get('phonenumber').value;
-                userInfo.introduction = interaction.options.get('introduction').value;
+                
                 let data = [];
                 data.push(userInfo);
                 fs.writeFileSync('introducitonData.json', JSON.stringify(data), (err) => {
