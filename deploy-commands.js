@@ -1,23 +1,29 @@
 const { SlashCommandBuilder, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { clientId, guildId, token } = require('./config.json');
+const { clientId, guildId, token } = require('./src/config.json');
 
 const commands = [
 	new SlashCommandBuilder().setName('ping').setDescription('Replies with pong!'),
+
 	new SlashCommandBuilder().setName('server').setDescription('Replies with server info!'),
-	new SlashCommandBuilder().setName('user').setDescription('Replies with user info!'),
+
 	new SlashCommandBuilder().setName('help').setDescription('Shows commands for bot'),
+
 	new SlashCommandBuilder().setName('createwallet').setDescription('Creates wallet to store coins'),
-	new SlashCommandBuilder().setName('addcoins').setDescription('Adds coins to user'),
+
+	new SlashCommandBuilder().setName('addcoins').setDescription('Adds coins to user')
+	.addIntegerOption(option => option.setName('amount').setDescription('Enter an integer').setRequired(true))
+	.addUserOption(option => option.setName('user').setDescription('Enter a user').setRequired(false))
+	.addMentionableOption(option => option.setName('role').setDescription('Enter a role').setRequired(false)),
 	new SlashCommandBuilder().setName('mycoins').setDescription('Shows available coins'),
+
 	new SlashCommandBuilder().setName('sendcoins').setDescription('Transfer your coins to other user')
 	.addUserOption(option => option.setName('user').setDescription('Select a user').setRequired(true))
-	.addIntegerOption(option => option.setName('int').setDescription('Enter an integer').setRequired(true)),
-	new SlashCommandBuilder().setName('newperson').setDescription('New command to save user in JSON(testing)'),
-	new SlashCommandBuilder().setName('newsendcoins').setDescription('New command to send coins to user and add logs in JSON(testing)')
-	.addUserOption(option => option.setName('user').setDescription('Select a user').setRequired(true))
-	.addIntegerOption(option => option.setName('coins').setDescription('Enter an integer').setRequired(true)),
+	.addIntegerOption(option => option.setName('amount').setDescription('Enter an integer').setRequired(true))
+	.addStringOption(option => option.setName('reason').setDescription('Enter your reason here').setRequired(true)),
+	
 	new SlashCommandBuilder().setName('showhistory').setDescription('Shows coin transfer history'),
+	
 	new SlashCommandBuilder().setName('introduce').setDescription('Introduce yourself to Ryaz')
 	.addStringOption(option => option.setName('name').setDescription('Enter your name').setRequired(true))
 	.addStringOption(option => option.setName('email').setDescription('Enter your email address').setRequired(true))
