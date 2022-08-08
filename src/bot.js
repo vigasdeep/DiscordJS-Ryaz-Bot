@@ -1,46 +1,30 @@
 require('dotenv').config();
 
 const fs = require('fs');
-const { PermissionToAddCoins, commonRole } = require('./config.json');
-const employee = require('./employee');
-const { responseCommand, embedCommand } = require('./embed');
-const  createIntroduction  = require('./introduction')
-const { EmbedBuilder, MessageCollector, Message } = require('discord.js');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { PermissionToAddCoins, commonRole, welcomeChannelId} = require('./config.json');
 
+const { responseCommand, embedCommand } = require('./embed');
+const { Client, GatewayIntentBits } = require('discord.js');
+const { connectToDb, EmployeeData,findUser, addCoins, addCoinsToAll, getCoins,transferCoins } = require('./mongoDbCoins');
+const { introductionObject } = require('./mongoDbIntroduction');
 
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages
     ],
-});
-let info = [];
-client.once('ready', () => {
-    console.log(`${client.user.tag} has logged in.`);
-    fs.readFile('employee.json', function (err, data) {
-        if (data.length == 0) {
-            data = [{}]
-            fs.writeFileSync('employee.json', data, (err) => {
-                if (err) throw err;
-                console.log('The file has been saved!');
-            });
-        }
-    })
-    fs.readFile('introductionData.json', function (err, data) {
-        if (data.length == 0) {
-            data = [{}]
-            fs.writeFileSync('introductionData.json', data, (err) => {
-                if (err) throw err;
-                console.log('The file has been saved!');
-            });
-        }
-    })
+    partials: ['MESSAGE']
 });
 
-client.on('guildMemberAdd', member => {
-    member.guild.channels.get('channelID').send("Welcome"); 
+client.once('ready', () => {
+    connectToDb();
+    console.log(`${client.user.tag} has logged in.`);
+    client.user.setPresence({
+        game: { name: '/help' },
+        status: 'online',
+       });
 });
 
 client.on('interactionCreate', async interaction => {
@@ -71,39 +55,39 @@ client.on('interactionCreate', async interaction => {
             break;
         }
         case 'createwallet': {
-            let data = [];
-            data = fs.readFileSync('employee.json').toString()
-            let newObject = JSON.parse(data);
-            len = newObject.length
-            let exist = 0;
-            for (let i = 0; i < len; i++) {
-
-                if (interaction.user.id === newObject[i]['id']) {
-                    exist = 1;
+            
+            userId = interaction.user.id;
+            data = await findUser(userId)
+            member = interaction.guild.members.cache.get(userId)
+            if(member.roles.cache.has(commonRole)){
+                if(data!==null){
+                    const fields = [{ name: `User Already Exists`, value: `Use /mycoins to see available coins`, inline: true }]
+                    
+                    const message = embedCommand('Create wallet command', fields, null);
+                    interaction.reply({ embeds: [message], ephemeral: true });
+                }else{
+                    const employee = new EmployeeData({
+                        name : interaction.user.username,
+                        recieveCoins: true,
+                        coins : 0,
+                        discordid: interaction.user.id,
+                        sentLogs : [],
+                        recieveLogs : [],
+                        addcoinsLogs :[],
+                    })
+                    employee.save();
+                    const description = `Created new User !`
+                    const fields = [{ name: `Name: ${employee.name}`, value: `Available Coins: ${employee.coins}`, inline: true }]
+                    // responseCommand(interaction,null,description,fields,true)
+                    const message = embedCommand('Create wallet command', fields, description);
+                    interaction.reply({ embeds: [message], ephemeral: true });
                 }
-
-            }
-            if (exist === 0) {
-                const person = new employee();
-                person.name = interaction.user.tag;
-                person.availableCoins = 0;
-                person.id = interaction.user.id;
-                newObject.push(person);
-                fs.writeFileSync('employee.json', JSON.stringify(newObject), (err) => {
-                    if (err) throw err;
-                    console.log('The file has been saved!');
-                });
-                const description = `Created new User !`
-                const fields = [{ name: `Name: ${person.name}`, value: `Available Coins: ${person.availableCoins}`, inline: true }]
-                // responseCommand(interaction,null,description,fields,true)
-                const message = embedCommand('Create wallet command', fields, description);
-                interaction.reply({ embeds: [message], ephemeral: true });
-            } else {
-                const fields = [{ name: `User Already Exists`, value: `Use /mycoins to see available coins`, inline: true }]
-                // responseCommand(interaction,null,null,fields,false);
-                const message = embedCommand('Create wallet command', fields, null);
+            }else{
+                const description = `You don't have permission to use this command`
+                const message = embedCommand('Create wallet command', null, description);
                 interaction.reply({ embeds: [message], ephemeral: true });
             }
+            
             break;
         }
         case 'addcoins': {
@@ -111,16 +95,8 @@ client.on('interactionCreate', async interaction => {
                 const description = `You don't have permission to use this command`
                 const message = embedCommand('Add Coins Command', null, description);
                 interaction.reply({ embeds: [message], ephemeral: true });
-            }else if(interaction.options.get('role').id !== commonRole){
-                const description = `You can't add coins to this role`
-                const message = embedCommand('Add Coins Command', null, description);
-                interaction.reply({ embeds: [message], ephemeral: true });
             }
             else {
-                let info = [];
-                info = fs.readFileSync('employee.json').toString()
-                let newInfo = JSON.parse(info);
-                len = newInfo.length
                 let role = null;
                 let user = null;
                 amount = interaction.options.get('amount').value;
@@ -131,63 +107,46 @@ client.on('interactionCreate', async interaction => {
                     return;
                 }
                 if (interaction.options.get('role') !== null) {
-                    role = interaction.options.get('role').id;
+                    role = interaction.options.get('role').value;
                 }
                 if (interaction.options.get('user') !== null) {
                     console.log(interaction.options.get('user'))
                     user = interaction.options.get('user').value;
                 }
-                id = 0;
                 if (user !== null) {
-                    for (let i = 0; i < len; i++) {
-                        if (newInfo[i]['id'] == user) {
-                            newInfo[i]['availableCoins'] += amount;
-                            const description = `Added ${amount} to ${newInfo[i]['name']} `
-                            const updatedPerson = JSON.stringify(newInfo);
-                            fs.writeFileSync('employee.json', updatedPerson, (err) => {
-                                if (err) throw err;
-                                console.log('The file has been saved!');
-                            });
-
-                            const message = embedCommand('Add Coins Command', null, description);
-                            interaction.reply({ embeds: [message], ephemeral: true });
-                        }
+                    const person = await findUser(user);
+                    if (person !== null){
+                        await addCoins(user,amount);
+                        const description = `Added ${amount} to ${person.name}`
+                        const message = embedCommand('Add Coins Command', null, description);
+                        interaction.reply({ embeds: [message], ephemeral: true });
+                    }else{
+                        const description = `User Doesn't have a wallet.`
+                        const message = embedCommand('Add Coins Command', null, description);
+                        interaction.reply({ embeds: [message], ephemeral: true });
                     }
-                } else if (role !== null) {
-                    let coinAdded = [];
-                    for (let x in newInfo) {
-                        member = interaction.guild.members.cache.get(newInfo[x]['id'])
-                        if (member.roles.cache.has(commonRole)) {
-                            newInfo[x]['availableCoins'] += amount;
-                            coinAdded.push({ name: `Added ${amount} to`, value: `${newInfo[x]['name']}`, inline: true })
-                        }
-                    }
-                    const updatedPerson = JSON.stringify(newInfo);
-                    fs.writeFileSync('employee.json', updatedPerson, (err) => {
-                        if (err) throw err;
-                        console.log('The file has been saved!');
-                    });
-                    const message = embedCommand('Add Coins Command', coinAdded, null);
+                }
+                 else if (role !== null) {
+                    if(role !== commonRole){
+                        const description = `You can't add coins to this role`
+                        const message = embedCommand('Add Coins Command', null, description);
+                        interaction.reply({ embeds: [message], ephemeral: true });
+                    }else{
+                    await addCoinsToAll(amount);
+                    const message = embedCommand('Add Coins Command', null, `${amount} added to every user !`);
                     interaction.reply({ embeds: [message], ephemeral: true });
+                    }
                 }
             }
-
             break;
         }
 
         case 'mycoins': {
-            let data = [];
-            data = fs.readFileSync('employee.json').toString()
-            let newObject = JSON.parse(data);
-            len = newObject.length
-            for (let i = 0; i < len; i++) {
-                if (interaction.user.id === newObject[i]['id']) {
-                    const title = 'My coins'
-                    const fields = [{ name: `Name: ${newObject[i]['name']}`, value: `Available Coins: ${newObject[i]['availableCoins']}`, inline: true }]
-                    responseCommand(interaction, title, fields, null, true);
-                }
-            }
-
+            id = interaction.user.id;
+            coins = await getCoins(id);
+            const title = 'My coins'
+            const fields = [{ name: `Name: ${interaction.user.username}`, value: `Available Coins: ${coins}`, inline: true }]
+            responseCommand(interaction, title, fields, null, true);
             break;
         }
         case 'sendcoins': {
@@ -202,70 +161,37 @@ client.on('interactionCreate', async interaction => {
             }
             if (amountToTransfer == 0) {
                 const title = "Amount must be non-zero and positive"
-                responseCommand(interaction, title, null, null, tre);
+                responseCommand(interaction, title, null, null, true);
                 return;
             } else if (amountToTransfer < 0) {
                 const title = "Amount should be positive integer"
                 responseCommand(interaction, title, null, null, true);
                 return;
             }
-            let data = [];
-            data = fs.readFileSync('employee.json').toString()
-            let newObject = JSON.parse(data);
-            len = newObject.length
-            let mindex = 0;
-            let exist = 0;
-            userExist = 0;
-            for (let i = 0; i < len; i++) {
-                if (myId === newObject[i]['id']) {
-                    exist = 1;
-                    mindex = i;
-                }
-            }
-            for (let i = 0; i < len; i++) {
-                if (userId === newObject[i]['id']) {
-                    userExist = 1;
-                    uindex = i;
-                }
-            }
-            if (exist === 1 && userExist === 1) {
-
-                if (newObject[mindex]['availableCoins'] < amountToTransfer) {
+            sender = await findUser(myId);
+            reciever = await findUser(userId);
+            if (sender !== null  && reciever !== null ) {
+                if (sender.coins < amountToTransfer) {
                     const title = "You don't have enough coins"
                     responseCommand(interaction, title, null, null, true);
                 }
                 else {
-                    newObject[uindex]['availableCoins'] += amountToTransfer;
-                    newObject[uindex]['recieveLog'].push(`Recieved ${amountToTransfer} coins from ${newObject[mindex]['name']}. Reason : ${reason}`);
-                    newObject[mindex]['availableCoins'] -= amountToTransfer;
-                    newObject[mindex]['sentLog'].push(`Transfered ${amountToTransfer} coins to ${newObject[uindex]['name']}. Reason : ${reason}`);
-                    const updatedPerson = JSON.stringify(newObject);
-                    fs.writeFileSync('employee.json', updatedPerson, (err) => {
-                        if (err) throw err;
-                        console.log('The file has been saved!');
-                    });
+                    transferCoins(myId,userId,amountToTransfer,sender.name,reciever.name,reason)
                     if (amountToTransfer == 1) {
-                        senderid = newObject[mindex]['id']
-                        recieverid = newObject[uindex]['id']
-                        const description = `<@${senderid}> ` + `transfered **${amountToTransfer} coin** to ` + `<@${recieverid}>\n**Reason** : ${reason}`
-
+                        const description = `<@${myId}> ` + `transfered **${amountToTransfer} coin** to ` + `<@${userId}>\n**Reason** : ${reason}`
                         responseCommand(interaction, 'Coin Transfered !', fields, description, false)
                         interaction.channel.send(`<@${PermissionToAddCoins}>`);
                     } else {
                         const title = 'Coins Transfered !'
-                        senderid = newObject[mindex]['id']
-                        recieverid = newObject[uindex]['id']
-                        const description = `<@${senderid}> ` + `transfered **${amountToTransfer} coins** to ` + `<@${recieverid}>\n**Reason** : ${reason}`
-
+                        const description = `<@${myId}> ` + `transfered **${amountToTransfer} coins** to ` + `<@${userId}>\n**Reason** : ${reason}`
                         responseCommand(interaction, title, null, description, false)
                         interaction.channel.send(`<@${PermissionToAddCoins}>`);
                     }
 
-
                 }
-            } else if (exist == 0) {
+            } else if (sender== null) {
                 responseCommand(interaction, null, null, "You do not have a wallet", false);
-            } else if (userExist == 0) {
+            } else if (reciever == null) {
                 responseCommand(interaction, null, null, "User does not have a wallet", false);
             } else {
                 responseCommand(interaction, null, null, "Something went wrong", false)
@@ -274,21 +200,12 @@ client.on('interactionCreate', async interaction => {
             break;
         case 'showhistory':
             {
-                let data = [];
-                data = fs.readFileSync('employee.json').toString()
-                let newObject = JSON.parse(data);
-                len = newObject.length
-                myId = interaction.user.id;
-                for (let i = 0; i < len; i++) {
-                    if (myId === newObject[i]['id']) {
-                        exist = 1;
-                        myindex = i;
-                    }
-                }
-                if (exist === 1) {
+                user = await findUser(interaction.user.id);
+                if (user!== 0) {
 
-                    SentInfo = newObject[myindex]['sentLog']
-                    RecieveInfo = newObject[myindex]['recieveLog']
+                    SentInfo = user.sentLogs;
+                    RecieveInfo = user.recieveLogs;
+                    AddInfo = user.addcoinsLogs;
                     function showThis(arr) {
                         len = arr.length;
                         console.log(len)
@@ -299,56 +216,48 @@ client.on('interactionCreate', async interaction => {
                         else {
                             return arr;
                         }
-
                     }
-                    if (SentInfo.length <= 0 && RecieveInfo.length <= 0) {
-
+                    EmbedARRAY = []
+                    if (AddInfo.length <= 0){
+                        const AddTitle = 'Coin Add History !'
+                        const AddDesc = `${user.name}\nNo coins recieved`
+                        const added = embedCommand(AddTitle, null, AddDesc);
+                        EmbedARRAY.push(added)
+                    }else{
+                        const AddTitle = 'Coin Add History !'
+                        const AddDesc = `${user.name}\n${AddInfo.map(showThis).join('\n')}`
+                        const added = embedCommand(AddTitle, null, AddDesc);
+                        EmbedARRAY.push(added)
+                    }
+                    if (SentInfo.length <= 0) {
                         const title = 'Coins Transfer History !';
-                        const description = `${newObject[myindex]['name']}\nNo coins Transfered`;
-                        const recieveTitle = 'Coins Recieve History !';
-                        const recieveDesc = (`${newObject[myindex]['name']}\nNo coins recieved`);
-
+                        const description = `${user.name}\nNo coins Transfered`;
                         const transfer = embedCommand(title, null, description);
-                        const recieved = embedCommand(recieveTitle, null, recieveDesc);
-                        interaction.reply({ embeds: [transfer, recieved], ephemeral: true });
-
+                        EmbedARRAY.push(transfer);
+                    }else {
+                        const title = 'Coins Transfer History !';
+                        const description = `${user.name}\n${SentInfo.map(showThis).join('\n')}`
+                        const transfer = embedCommand(title, null, description);
+                        EmbedARRAY.push(transfer);
                     }
-                    else if (SentInfo.length > 0 && RecieveInfo.length == 0) {
+                     if (RecieveInfo.length <= 0) {
 
-                        const transferTitle = 'Coins Transfer History !'
-                        const transferDescription = `${newObject[myindex]['name']}\n${SentInfo.map(showThis).join('\n')}`
+                        const recieveTitle = 'Coins Recieve History !';
+                        const recieveDesc = `${user.name}\nNo coins recieved`;
 
+                        const recieved = embedCommand(recieveTitle, null, recieveDesc);
+                        EmbedARRAY.push(recieved);
+                    }
+                    else  {
                         const recieveTitle = 'Coins Recieve History !'
-                        const recieveDesc = `${newObject[myindex]['name']}\nNo coins recieved`
-
-                        const transfer = embedCommand(transferTitle, null, transferDescription);
+                        const recieveDesc = `${user.name}\n${RecieveInfo.map(showThis).join('\n')}`
                         const recieved = embedCommand(recieveTitle, null, recieveDesc);
-
-                        interaction.reply({ embeds: [transfer, recieved], ephemeral: true });
+                        EmbedARRAY.push(recieved)
                     }
-                    else if (SentInfo.length == 0 && RecieveInfo.length > 0) {
-
-                        const transferTitle = 'Coins Transfer History !'
-                        const transferDescription = `${newObject[myindex]['name']}\nNo coins Transfered`
-
-                        const recieveTitle = 'Coins Recieve History !'
-                        const recieveDesc = `${newObject[myindex]['name']}\n${RecieveInfo.map(showThis).join('\n')}`
-                        const transfer = embedCommand(transferTitle, null, transferDescription);
-                        const recieved = embedCommand(recieveTitle, null, recieveDesc);
-
-                        interaction.reply({ embeds: [transfer, recieved], ephemeral: true });
-                    }
-                    else {
-                        const transferTitle = 'Coins Transfer History !'
-                        const transferDescription = `${newObject[myindex]['name']}\n${SentInfo.map(showThis).join('\n')}`
-
-                        const recieveTitle = 'Coins Recieve History !'
-                        const recieveDesc = `${newObject[myindex]['name']}\n${RecieveInfo.map(showThis).join('\n')}`
-
-                        const transfer = embedCommand(transferTitle, null, transferDescription);
-                        const recieved = embedCommand(recieveTitle, null, recieveDesc);
-                        interaction.reply({ embeds: [transfer, recieved], ephemeral: true });
-                    }
+                    
+                    interaction.reply({ embeds: EmbedARRAY, ephemeral: true });
+                     
+                    
                 }
             }
             break;
@@ -357,18 +266,27 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate',   msg =>{
-    if(msg.content.toLocaleLowerCase() == "!introduce"){
-        msg.reply('What is your name?');
+    if(msg.author.bot) return;
+    let isWelcomeMessage = msg.type === 7
+
+    if (isWelcomeMessage){
+        const Title = `Welcome ${msg.author.username}`
+        const description = `Please type !introduce to give your introduction`
+        const introductionEmbed = embedCommand(Title, null, description);
+        client.channels.cache.get(welcomeChannelId).send({ embeds: [introductionEmbed], ephemeral: true })
+    }
+   
+    if(msg.content.toLocaleLowerCase().startsWith ("!introduce")){
+        msg.channel.send('What is your name?');
         let name = 'string';
         let email = 'string';
         let introduction = 'string';
-        let filter = (msg) => !msg.author.bot;
+        const userID = msg.author.id
+        let filter = (m) => {!msg.author.bot, msg.author.id === userID} ;
         let options = {
           max: 2,
           time: 500
         };
-        let user = new createIntroduction();
-        user.id = msg.author.id;
         counter = 0;
         
         let collector = msg.channel.createMessageCollector(filter, options);
@@ -383,30 +301,36 @@ client.on('messageCreate',   msg =>{
             }
             if (counter == 5){
                 introduction = m.content;
-                msg.channel.send("Thanks for introducing yourself to us")
                 collector.stop();
             }
           counter+=1
         });
         collector.on('end', (collected) => {
           console.log(`Collected ${collected.size} items`);
-          user.email = email;
-        user.name = name;
-        user.introduction = introduction;
-        let data = [];
-        data = fs.readFileSync('introductionData.json').toString()
-        let newObject = JSON.parse(data);
-
-        newObject.push(user);
-        fs.writeFileSync('introductionData.json', JSON.stringify(newObject), (err) => {
-            if (err) throw err;
-            console.log('The file has been saved!');
-        });
+          const person = new introductionObject({
+            name : name,
+            discordid: msg.author.id,
+            email : email,
+            information : introduction
+        })
+        person.save()
+        msg.channel.bulkDelete(6);
+        const Title = `Introduction of ${msg.author.username}`
+        const description = `Email : ${email}`
+        const fields =[
+            { name: 'Introduction', value: `${introduction}`, inline: true },
+        ]
+        const introductionEmbed = embedCommand(Title, fields, description);
+       
+        msg.channel.send({ embeds: [introductionEmbed], ephemeral: true });
         });
         
     }
     
 })
+
+
+
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
