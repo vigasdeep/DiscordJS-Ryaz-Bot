@@ -80,6 +80,8 @@ async function addCoins(id,amount){
 async function addCoinsToAll(amount){
  const query =  { recieveCoins: true};
  data = await EmployeeData.updateMany(query,{$inc: { coins: amount}})
+ sentTo = await EmployeeData.find(query);
+ return sentTo;
 }
 
 async function getCoins(id){

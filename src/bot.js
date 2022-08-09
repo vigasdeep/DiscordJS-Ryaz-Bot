@@ -1,11 +1,11 @@
 require('dotenv').config();
 
 const fs = require('fs');
-const { PermissionToAddCoins, commonRole, welcomeChannelId} = require('./config.json');
+const { PermissionToAddCoins, commonRole, welcomeChannelId } = require('./config.json');
 
 const { responseCommand, embedCommand } = require('./embed');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { connectToDb, EmployeeData,findUser, addCoins, addCoinsToAll, getCoins,transferCoins } = require('./mongoDbCoins');
+const { connectToDb, EmployeeData, findUser, addCoins, addCoinsToAll, getCoins, transferCoins } = require('./mongoDbCoins');
 const { introductionObject } = require('./mongoDbIntroduction');
 
 const client = new Client({
@@ -24,7 +24,7 @@ client.once('ready', () => {
     client.user.setPresence({
         game: { name: '/help' },
         status: 'online',
-       });
+    });
 });
 
 client.on('interactionCreate', async interaction => {
@@ -55,25 +55,25 @@ client.on('interactionCreate', async interaction => {
             break;
         }
         case 'createwallet': {
-            
+
             userId = interaction.user.id;
             data = await findUser(userId)
             member = interaction.guild.members.cache.get(userId)
-            if(member.roles.cache.has(commonRole)){
-                if(data!==null){
+            if (member.roles.cache.has(commonRole)) {
+                if (data !== null) {
                     const fields = [{ name: `User Already Exists`, value: `Use /mycoins to see available coins`, inline: true }]
-                    
+
                     const message = embedCommand('Create wallet command', fields, null);
                     interaction.reply({ embeds: [message], ephemeral: true });
-                }else{
+                } else {
                     const employee = new EmployeeData({
-                        name : interaction.user.username,
+                        name: interaction.user.username,
                         recieveCoins: true,
-                        coins : 0,
+                        coins: 0,
                         discordid: interaction.user.id,
-                        sentLogs : [],
-                        recieveLogs : [],
-                        addcoinsLogs :[],
+                        sentLogs: [],
+                        recieveLogs: [],
+                        addcoinsLogs: [],
                     })
                     employee.save();
                     const description = `Created new User !`
@@ -82,12 +82,12 @@ client.on('interactionCreate', async interaction => {
                     const message = embedCommand('Create wallet command', fields, description);
                     interaction.reply({ embeds: [message], ephemeral: true });
                 }
-            }else{
+            } else {
                 const description = `You don't have permission to use this command`
                 const message = embedCommand('Create wallet command', null, description);
                 interaction.reply({ embeds: [message], ephemeral: true });
             }
-            
+
             break;
         }
         case 'addcoins': {
@@ -115,26 +115,36 @@ client.on('interactionCreate', async interaction => {
                 }
                 if (user !== null) {
                     const person = await findUser(user);
-                    if (person !== null){
-                        await addCoins(user,amount);
+                    if (person !== null) {
+                        await addCoins(user, amount);
                         const description = `Added ${amount} to ${person.name}`
                         const message = embedCommand('Add Coins Command', null, description);
                         interaction.reply({ embeds: [message], ephemeral: true });
-                    }else{
+                    } else {
                         const description = `User Doesn't have a wallet.`
                         const message = embedCommand('Add Coins Command', null, description);
                         interaction.reply({ embeds: [message], ephemeral: true });
                     }
                 }
-                 else if (role !== null) {
-                    if(role !== commonRole){
+                else if (role !== null) {
+                    if (role !== commonRole) {
                         const description = `You can't add coins to this role`
                         const message = embedCommand('Add Coins Command', null, description);
                         interaction.reply({ embeds: [message], ephemeral: true });
-                    }else{
-                    await addCoinsToAll(amount);
-                    const message = embedCommand('Add Coins Command', null, `${amount} added to every user !`);
-                    interaction.reply({ embeds: [message], ephemeral: true });
+                    } else {
+                        data = await addCoinsToAll(amount);
+                        if (data.length === 0) {
+                            const message = embedCommand('Add Coins Command', null, `No data in database`);
+                            interaction.reply({ embeds: [message], ephemeral: true });
+                        } else {
+                            fields = [];
+                            for (let x in data) {
+                                fields.push({ name: `Added ${amount} coins to`, value: data[x]['name'] });
+                            }
+                            const message = embedCommand('Add Coins Command', fields, null);
+                            interaction.reply({ embeds: [message], ephemeral: true });
+                        }
+
                     }
                 }
             }
@@ -170,13 +180,13 @@ client.on('interactionCreate', async interaction => {
             }
             sender = await findUser(myId);
             reciever = await findUser(userId);
-            if (sender !== null  && reciever !== null ) {
+            if (sender !== null && reciever !== null) {
                 if (sender.coins < amountToTransfer) {
                     const title = "You don't have enough coins"
                     responseCommand(interaction, title, null, null, true);
                 }
                 else {
-                    transferCoins(myId,userId,amountToTransfer,sender.name,reciever.name,reason)
+                    transferCoins(myId, userId, amountToTransfer, sender.name, reciever.name, reason)
                     if (amountToTransfer == 1) {
                         const description = `<@${myId}> ` + `transfered **${amountToTransfer} coin** to ` + `<@${userId}>\n**Reason** : ${reason}`
                         responseCommand(interaction, 'Coin Transfered !', fields, description, false)
@@ -189,7 +199,7 @@ client.on('interactionCreate', async interaction => {
                     }
 
                 }
-            } else if (sender== null) {
+            } else if (sender == null) {
                 responseCommand(interaction, null, null, "You do not have a wallet", false);
             } else if (reciever == null) {
                 responseCommand(interaction, null, null, "User does not have a wallet", false);
@@ -201,7 +211,7 @@ client.on('interactionCreate', async interaction => {
         case 'showhistory':
             {
                 user = await findUser(interaction.user.id);
-                if (user!== 0) {
+                if (user !== 0) {
 
                     SentInfo = user.sentLogs;
                     RecieveInfo = user.recieveLogs;
@@ -218,12 +228,12 @@ client.on('interactionCreate', async interaction => {
                         }
                     }
                     EmbedARRAY = []
-                    if (AddInfo.length <= 0){
+                    if (AddInfo.length <= 0) {
                         const AddTitle = 'Coin Add History !'
                         const AddDesc = `${user.name}\nNo coins recieved`
                         const added = embedCommand(AddTitle, null, AddDesc);
                         EmbedARRAY.push(added)
-                    }else{
+                    } else {
                         const AddTitle = 'Coin Add History !'
                         const AddDesc = `${user.name}\n${AddInfo.map(showThis).join('\n')}`
                         const added = embedCommand(AddTitle, null, AddDesc);
@@ -234,13 +244,13 @@ client.on('interactionCreate', async interaction => {
                         const description = `${user.name}\nNo coins Transfered`;
                         const transfer = embedCommand(title, null, description);
                         EmbedARRAY.push(transfer);
-                    }else {
+                    } else {
                         const title = 'Coins Transfer History !';
                         const description = `${user.name}\n${SentInfo.map(showThis).join('\n')}`
                         const transfer = embedCommand(title, null, description);
                         EmbedARRAY.push(transfer);
                     }
-                     if (RecieveInfo.length <= 0) {
+                    if (RecieveInfo.length <= 0) {
 
                         const recieveTitle = 'Coins Recieve History !';
                         const recieveDesc = `${user.name}\nNo coins recieved`;
@@ -248,85 +258,85 @@ client.on('interactionCreate', async interaction => {
                         const recieved = embedCommand(recieveTitle, null, recieveDesc);
                         EmbedARRAY.push(recieved);
                     }
-                    else  {
+                    else {
                         const recieveTitle = 'Coins Recieve History !'
                         const recieveDesc = `${user.name}\n${RecieveInfo.map(showThis).join('\n')}`
                         const recieved = embedCommand(recieveTitle, null, recieveDesc);
                         EmbedARRAY.push(recieved)
                     }
-                    
+
                     interaction.reply({ embeds: EmbedARRAY, ephemeral: true });
-                     
-                    
+
+
                 }
             }
             break;
-       
+
     }
 });
 
-client.on('messageCreate',   msg =>{
-    if(msg.author.bot) return;
+client.on('messageCreate', msg => {
+    if (msg.author.bot) return;
     let isWelcomeMessage = msg.type === 7
 
-    if (isWelcomeMessage){
+    if (isWelcomeMessage) {
         const Title = `Welcome ${msg.author.username}`
         const description = `Please type !introduce to give your introduction`
         const introductionEmbed = embedCommand(Title, null, description);
         client.channels.cache.get(welcomeChannelId).send({ embeds: [introductionEmbed], ephemeral: true })
     }
-   
-    if(msg.content.toLocaleLowerCase().startsWith ("!introduce")){
+
+    if (msg.content.toLocaleLowerCase().startsWith("!introduce")) {
         msg.channel.send('What is your name?');
         let name = 'string';
         let email = 'string';
         let introduction = 'string';
         const userID = msg.author.id
-        let filter = (m) => {!msg.author.bot, msg.author.id === userID} ;
+        let filter = (m) => { !msg.author.bot, msg.author.id === userID };
         let options = {
-          max: 2,
-          time: 500
+            max: 2,
+            time: 500
         };
         counter = 0;
-        
+
         let collector = msg.channel.createMessageCollector(filter, options);
         collector.on('collect', (m) => {
-            if (counter == 1){
+            if (counter == 1) {
                 name = m.content;
                 msg.channel.send("What is your email?")
             }
-            if (counter == 3){
+            if (counter == 3) {
                 email = m.content;
                 msg.channel.send("Tell us about yourself")
             }
-            if (counter == 5){
+            if (counter == 5) {
                 introduction = m.content;
                 collector.stop();
             }
-          counter+=1
+            counter += 1
         });
         collector.on('end', (collected) => {
-          console.log(`Collected ${collected.size} items`);
-          const person = new introductionObject({
-            name : name,
-            discordid: msg.author.id,
-            email : email,
-            information : introduction
-        })
-        person.save()
-        msg.channel.bulkDelete(6);
-        const Title = `Introduction of ${msg.author.username}`
-        const description = `Email : ${email}`
-        const fields =[
-            { name: 'Introduction', value: `${introduction}`, inline: true },
-        ]
-        const introductionEmbed = embedCommand(Title, fields, description);
-       
-        msg.channel.send({ embeds: [introductionEmbed], ephemeral: true });
+            console.log(`Collected ${collected.size} items`);
+            const person = new introductionObject({
+                name: name,
+                discordid: msg.author.id,
+                email: email,
+                information: introduction
+            })
+            person.save()
+            msg.channel.bulkDelete(6);
+            const Title = `Introduction of ${msg.author.username}`
+            const description = `Email : ${email}`
+            const fields = [
+                { name: 'Introduction', value: `${introduction}`, inline: true },
+            ]
+            const introductionEmbed = embedCommand(Title, fields, description);
+
+            msg.channel.send({ embeds: [introductionEmbed], ephemeral: true });
         });
-        
+
     }
-    
+
 })
 
 
