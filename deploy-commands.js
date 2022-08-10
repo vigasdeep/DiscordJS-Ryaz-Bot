@@ -1,6 +1,9 @@
 const { SlashCommandBuilder, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { clientId, guildId, token } = require('./src/config.json');
+require('dotenv').config();
+const botId = process.env.BOT_ID;
+const serverId = process.env.SERVER_ID;
+const botToken = process.env.DISCORD_BOT_TOKEN;
 
 const commands = [
 	new SlashCommandBuilder().setName('ping').setDescription('Replies with pong!'),
@@ -15,6 +18,7 @@ const commands = [
 	.addIntegerOption(option => option.setName('amount').setDescription('Enter an integer').setRequired(true))
 	.addUserOption(option => option.setName('user').setDescription('Enter a user').setRequired(false))
 	.addMentionableOption(option => option.setName('role').setDescription('Enter a role').setRequired(false)),
+	
 	new SlashCommandBuilder().setName('mycoins').setDescription('Shows available coins'),
 
 	new SlashCommandBuilder().setName('sendcoins').setDescription('Transfer your coins to other user')
@@ -28,9 +32,9 @@ const commands = [
 ]
 	.map(command => command.toJSON());
 
-const rest = new REST({ version: '10' }).setToken(token);
+const rest = new REST({ version: '10' }).setToken(botToken);
 
-rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
+rest.put(Routes.applicationGuildCommands(botId, serverId), { body: commands })
 	.then(() => console.log('Successfully registered application commands.'))
 	.catch(console.error);
 

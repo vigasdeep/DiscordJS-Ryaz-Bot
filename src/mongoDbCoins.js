@@ -1,5 +1,7 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
-const {mongodbAtlasLink} = require('./config.json');
+// const {mongodbAtlasLink} = require('./config.json');
+const mongodbAtlasLink = process.env.MONGODB_LINK;
 
 const  connectToDb = () =>{
     mongoose.connect(mongodbAtlasLink,{
@@ -54,7 +56,7 @@ async function updateData(id,amount){
         newCoins = model.coins+coinsToAdd;
     }
     const time = getDateAndTime()
-    const elementToPush = `Amount Transfered : ${newCoins}\nReason Some reason here`;
+    const elementToPush = `Amount Transfered : ${newCoins} coins \nReason Some reason here`;
     // const newModel = await EmployeeData.findOneAndUpdate(query,{coins:`${newCoins}`});
     const newModel = await EmployeeData.findOneAndUpdate(query, {$push: { sentLogs: elementToPush }});
     console.log('Model after updating')
@@ -71,15 +73,18 @@ async function addCoins(id,amount){
         newCoins = model.coins+coinsToAdd;
     }
     const time = getDateAndTime()
-    const elementToPush = `Added: ${newCoins} on ${time}`;
+    const elementToPush = `Added: ${newCoins} coins on ${time}`;
     await EmployeeData.findOneAndUpdate(query,{$set:{coins:`${newCoins}`}});
     await EmployeeData.findOneAndUpdate(query, {$push: { addcoinsLogs: elementToPush }});
     
 }
 
 async function addCoinsToAll(amount){
+ const time = getDateAndTime()
  const query =  { recieveCoins: true};
- data = await EmployeeData.updateMany(query,{$inc: { coins: amount}})
+ const elementToPush = `Added: ${amount} coins on ${time}`;
+ await EmployeeData.updateMany(query,{$inc: { coins: amount}});
+ await EmployeeData.findOneAndUpdate(query, {$push: { addcoinsLogs: elementToPush }});
  sentTo = await EmployeeData.find(query);
  return sentTo;
 }
@@ -93,10 +98,10 @@ async function getCoins(id){
 
 async function transferCoins(senderid,recieverid,amount,senderName,recieverName,reason){
     const time = getDateAndTime()
-    const sent = `Transfered: ${amount} on ${time} to ${recieverName}. Reason : ${reason}`;
+    const sent = `Transfered: ${amount} coins on ${time} to ${recieverName}. Reason : ${reason}`;
     await EmployeeData.findOneAndUpdate({discordid:senderid},{$inc: { coins: -amount}});
     await EmployeeData.findOneAndUpdate({discordid:senderid}, {$push: { sentLogs: sent }});
-    const recieve = `Got ${amount} on ${time} from ${senderName}. Reason: ${reason}`;
+    const recieve = `Got ${amount} coins on ${time} from ${senderName}. Reason: ${reason}`;
     await EmployeeData.findOneAndUpdate({discordid:recieverid},{$inc: { coins: amount}});
     await EmployeeData.findOneAndUpdate({discordid:recieverid}, {$push: { recieveLogs: recieve }});
 }

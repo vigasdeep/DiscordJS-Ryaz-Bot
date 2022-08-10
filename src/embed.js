@@ -1,11 +1,13 @@
 
 const { EmbedBuilder } = require('discord.js');
-const embedCommand = (title, fields, description) => {
+
+const embedCommand = (client,title, fields, description) => {
+    
     const exampleEmbed = new EmbedBuilder()
         .setColor(0x4ce4b1)
-        .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+        .setAuthor({ name: `${client.user.username}`, iconURL: ` https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240` })
         .setTimestamp()
-        .setFooter({ text: 'Ryaz DiscordJS Bot' });
+        .setFooter({ text: `${client.user.username}` });
     if (description != null) {
         exampleEmbed.setDescription(description);
     }
@@ -18,13 +20,13 @@ const embedCommand = (title, fields, description) => {
     return exampleEmbed;
 }
 
-const responseCommand = (interaction, title, fields, description, ephemeral) => {
+const responseCommand = (client,interaction, title, fields, description, ephemeral) => {
     const exampleEmbed = new EmbedBuilder()
         .setColor(0x4ce4b1)
 
-        .setAuthor({ name: 'Ryaz DiscordJS Bot', iconURL: 'https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240' })
+        .setAuthor({ name: `${client.user.username}`, iconURL: ` https://cdn.discordapp.com/icons/567953549791723530/49214a6caeae3b19376dc94ced5bbbfc.webp?size=240` })
         .setTimestamp()
-        .setFooter({ text: 'Ryaz DiscordJS Bot' });
+        .setFooter({ text: `${client.user.username}` });
     if (description !== null) {
         exampleEmbed.setDescription(description);
     }
