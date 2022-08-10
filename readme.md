@@ -56,12 +56,14 @@ Once you have filled the values, open terminal and use `node .` to run the bot
 ⚠️**Note: [Validate](https://www.mongodb.com/docs/atlas/data-federation/tutorial/add-ip-address/) your IP Address in your MongoDB server**⚠️
 
 And your bot is ready to go !
+
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1006833647048982618/unknown.png)
 
 #### You can also change the image shown in the embed by simply editing `iconURL` in `src/embeds.js`
 
 ## 📝 Features & Commands In Details
 - Sends a welcome message in the channel once a new user joins
+
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1006813152937259049/unknown.png)
 
 ### - `/help` Shows all commands of the bot 
@@ -74,6 +76,7 @@ And your bot is ready to go !
 
 ### - `/createwallet` Creates the wallet for the user
 Note: The user must have the same role which was added to `.env` file
+
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1006818379878912020/unknown.png)
 
 ### - `/addcoins` 
