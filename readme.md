@@ -48,6 +48,10 @@ After that, open `deploy-commands.js` and run `node ./deploy-commands.js`
 
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1006833131380289657/unknown.png)
 
+### **Note: Everytime you make changes in this file, make sure to run `node ./deploy-commands.js`**
+
+You can also add your [slash commands](https://discordjs.guide/interactions/slash-commands.html#registering-slash-commands) to this bot.
+
 Once you have filled the values, open terminal and use `node .` to run the bot
 
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1006833402974056458/unknown.png)
