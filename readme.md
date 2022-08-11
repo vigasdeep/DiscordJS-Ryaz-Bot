@@ -134,8 +134,23 @@ This command will show you all the coin transfers done till now.
 
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1006825152434159716/unknown.png)
 
+### - `/introduce`
 
-### - `!introduce`
+Introduce yourself to the member's of the server
+
+![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007188676045975612/unknown.png)
+
+![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007188720966971412/unknown.png)
+
+### - `/findintroduction`
+
+Find user's introduction (only user's with `COMMON_ROLE` can use this command)
+
+![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007193012687867914/unknown.png)
+
+![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007193067213815888/unknown.png)
+
+### - `!introduce` ⚠️ Note: This command can be used but it is still in development.⚠️
 
 Using this command, new users can introduce themself to other user's in server.
 The bot will ask a series of questions to the user and after the user answers all the questions, the bot will save his introduction.
