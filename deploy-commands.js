@@ -28,6 +28,14 @@ const commands = [
 	
 	new SlashCommandBuilder().setName('showhistory').setDescription('Shows coin transfer history'),
 
+	new SlashCommandBuilder().setName('introduce').setDescription(`Introduce yourself to other member's of the server`)
+	.addStringOption(option => option.setName('name').setDescription('Enter your name').setRequired(true))
+	.addStringOption(option => option.setName('email').setDescription('Enter your email address').setRequired(true))
+	.addStringOption(option => option.setName('introduction').setDescription('Enter your introduction here').setRequired(true)),
+	
+	new SlashCommandBuilder().setName('findintroduction').setDescription(`Find user's introduction`)
+	.addUserOption(option => option.setName('user').setDescription('Select a user').setRequired(true)),
+	
 	
 ]
 	.map(command => command.toJSON());

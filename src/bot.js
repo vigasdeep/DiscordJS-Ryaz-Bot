@@ -4,8 +4,8 @@ const fs = require('fs');
 // const { PermissionToAddCoins, commonRole, welcomeChannelId } = require('./config.json');
 const { responseCommand, embedCommand } = require('./embed');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { connectToDb, EmployeeData, findUser, addCoins, addCoinsToAll, getCoins, transferCoins } = require('./mongoDbCoins');
-const { introductionObject } = require('./mongoDbIntroduction');
+const { connectToDb, EmployeeData, findUser, addCoins, addCoinsToAll, getCoins, transferCoins,getDateAndTime } = require('./mongoDbCoins');
+const { introductionObject, findUserInfo } = require('./mongoDbIntroduction');
 
 const client = new Client({
     intents: [
@@ -280,6 +280,47 @@ client.on('interactionCreate', async interaction => {
                 }
             }
             break;
+            case 'introduce':{
+               const  name = interaction.options.get('name').value;
+                const email = interaction.options.get('email').value;
+                const introduction = interaction.options.get('introduction').value;
+
+                const person = new introductionObject({
+                    name: name,
+                    discordid: interaction.user.id,
+                    email: email,
+                    information: introduction,
+                    date : getDateAndTime()
+                })
+                person.save()
+                
+                const Title = `Introduction of ${person.name}`
+                const description = `Email : ${email}`
+                const fields = [
+                    { name: 'Introduction', value: `${introduction}`, inline: true },
+                ]
+                const introductionEmbed = embedCommand(client,Title, fields, description);
+    
+                interaction.reply({ embeds: [introductionEmbed], ephemeral: false });
+            }
+            break;
+            case 'findintroduction':{
+                const user = interaction.options.get('user').value;
+                person = await findUserInfo(user);
+                if (person === null){
+                    const Title = `Find Information command`;
+                    const description = `The user does not have an introduction`;
+                    const introductionEmbed = embedCommand(client,Title, null, description);
+                    interaction.reply({ embeds: [introductionEmbed], ephemeral: true });
+                }else{
+                    const Title = `Find Information command`;
+                    const description = `**Name** : ${person.name}\n**Email**:${person.email}\n**Introduction**: ${person.information}\n**Created on**: ${person.date}`;
+                    const introductionEmbed = embedCommand(client,Title, null, description);
+                    interaction.reply({ embeds: [introductionEmbed], ephemeral: true });
+                }
+            }
+            break;
+                
 
     }
 });
@@ -333,7 +374,8 @@ client.on('messageCreate', msg => {
                 name: name,
                 discordid: msg.author.id,
                 email: email,
-                information: introduction
+                information: introduction,
+                date : getDateAndTime()
             })
             person.save()
             

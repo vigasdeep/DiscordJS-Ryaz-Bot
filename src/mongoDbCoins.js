@@ -46,22 +46,6 @@ async function findUser(id){
 }
 
 
-async function updateData(id,amount){
-    const query = { discordid: id };
-    const model = await EmployeeData.findOne(query);
-    const coinsToAdd = amount;
-    if (model.coins === 0){
-        newCoins = coinsToAdd;
-    }else{
-        newCoins = model.coins+coinsToAdd;
-    }
-    const time = getDateAndTime()
-    const elementToPush = `Amount Transfered : ${newCoins} coins \nReason Some reason here`;
-    // const newModel = await EmployeeData.findOneAndUpdate(query,{coins:`${newCoins}`});
-    const newModel = await EmployeeData.findOneAndUpdate(query, {$push: { sentLogs: elementToPush }});
-    console.log('Model after updating')
-    console.log(newModel)
-}
 
 async function addCoins(id,amount){
     const query = { discordid: id };
@@ -115,4 +99,5 @@ module.exports = {
     addCoinsToAll:addCoinsToAll,
     getCoins: getCoins,
     transferCoins :transferCoins,
+    getDateAndTime: getDateAndTime,
 };
