@@ -305,7 +305,10 @@ client.on('interactionCreate', async interaction => {
             }
             break;
             case 'findintroduction':{
-                const user = interaction.options.get('user').value;
+                userId = interaction.user.id;
+                member = interaction.guild.members.cache.get(userId)
+                if (member.roles.cache.has(commonRole)){
+                    const user = interaction.options.get('user').value;
                 person = await findUserInfo(user);
                 if (person === null){
                     const Title = `Find Information command`;
@@ -318,6 +321,13 @@ client.on('interactionCreate', async interaction => {
                     const introductionEmbed = embedCommand(client,Title, null, description);
                     interaction.reply({ embeds: [introductionEmbed], ephemeral: true });
                 }
+                }else{
+                    const Title = `Find Information command`;
+                    const description = `You don't have permission to use this command`;
+                    const introductionEmbed = embedCommand(client,Title, null, description);
+                    interaction.reply({ embeds: [introductionEmbed], ephemeral: true });
+                }
+                
             }
             break;
                 
