@@ -144,11 +144,16 @@ Introduce yourself to the member's of the server
 
 ### - `/findintroduction`
 
-Find user's introduction (only user's with `COMMON_ROLE` can use this command)
+Find user's introduction
 
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007193012687867914/unknown.png)
 
 ![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007193067213815888/unknown.png)
+
+⚠️**Note: Only user's with `COMMON_ROLE` can use this command** ⚠️ 
+
+
+![App Screenshot](https://cdn.discordapp.com/attachments/1006813112038608896/1007201814984269865/unknown.png)
 
 ### - `!introduce` ⚠️ Note: This command can be used but it is still in development.⚠️
 
