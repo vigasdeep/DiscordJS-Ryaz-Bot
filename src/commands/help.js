@@ -1,11 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { responseCommand, embedCommand } = require('../functions/embed');
+const { responseCommand } = require('../functions/embed');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('ping')
-		.setDescription('Replies with Pong!'),
-	async execute(interaction,client) {
+		.setName('help')
+		.setDescription('Shows the list of commands'),
+	async execute(interaction) {
 		
         const fields = [{ name: '/ping', value: `Shows API Latency`, inline: true },
             { name: '/server', value: `Shows Server Info`, inline: true },
@@ -18,7 +18,7 @@ module.exports = {
             { name: '/introduce', value: `Shows All coin transfer history`, inline: true },
             { name: '/findintroduction', value: `Gives user's introduction`, inline: true }]
             const description = `Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`
-            return responseCommand(client,interaction, 'Help', fields, description, false);
+            return responseCommand(interaction, 'Help', fields, description, false);
 
 	},
 };

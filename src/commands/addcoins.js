@@ -13,11 +13,11 @@ module.exports = {
 	.addUserOption(option => option.setName('user').setDescription('Enter a user').setRequired(false))
 	.addMentionableOption(option => option.setName('role').setDescription('Enter a role').setRequired(false)),
 	
-    async execute(interaction,client) {
+    async execute(interaction) {
         
         if (interaction.user.id != PermissionToAddCoins) {
             const description = `You don't have permission to use this command`
-            const message = embedCommand(client,'Add Coins Command', null, description);
+            const message = embedCommand(interaction,'Add Coins Command', null, description);
             return interaction.reply({ embeds: [message], ephemeral: true });
         }
         else {
@@ -26,7 +26,7 @@ module.exports = {
             amount = interaction.options.get('amount').value;
             if (amount <= 0) {
                 const description = `Amount must be positive`
-                const message = embedCommand(client,'Add Coins Command', null, description);
+                const message = embedCommand(interaction,'Add Coins Command', null, description);
                 return interaction.reply({ embeds: [message], ephemeral: true });
                 
             }
@@ -39,7 +39,7 @@ module.exports = {
             }
             if (user !== null && role !== null){
                 const description = `Please select only one option.`
-                const message = embedCommand(client,'Add Coins Command', null, description);
+                const message = embedCommand(interaction,'Add Coins Command', null, description);
                 return interaction.reply({ embeds: [message], ephemeral: true });
             }
             else if (user !== null) {
@@ -47,30 +47,30 @@ module.exports = {
                 if (person !== null) {
                     await addCoins(user, amount);
                     const description = `Added ${amount} to ${person.name}`
-                    const message = embedCommand(client,'Add Coins Command', null, description);
+                    const message = embedCommand(interaction,'Add Coins Command', null, description);
                     return interaction.reply({ embeds: [message], ephemeral: true });
                 } else {
                     const description = `User Doesn't have a wallet.`
-                    const message = embedCommand(client,'Add Coins Command', null, description);
+                    const message = embedCommand(interaction,'Add Coins Command', null, description);
                     return interaction.reply({ embeds: [message], ephemeral: true });
                 }
             }
             else if (role !== null) {
                 if (role !== commonRole) {
                     const description = `You can't add coins to this role`
-                    const message = embedCommand(client,'Add Coins Command', null, description);
+                    const message = embedCommand(interaction,'Add Coins Command', null, description);
                     return interaction.reply({ embeds: [message], ephemeral: true });
                 } else {
                     data = await addCoinsToAll(amount);
                     if (data.length === 0) {
-                        const message = embedCommand(client,'Add Coins Command', null, `No data in database`);
+                        const message = embedCommand(interaction,'Add Coins Command', null, `No data in database`);
                         return interaction.reply({ embeds: [message], ephemeral: true });
                     } else {
                         fields = [];
                         for (let x in data) {
                             fields.push({ name: `Added ${amount} coins to`, value: data[x]['name'] });
                         }
-                        const message = embedCommand(client,'Add Coins Command', fields, null);
+                        const message = embedCommand(interaction,'Add Coins Command', fields, null);
                         return interaction.reply({ embeds: [message], ephemeral: true });
                     }
 

@@ -15,7 +15,7 @@ module.exports = {
         .addStringOption(option => option.setName('reason').setDescription('Enter your reason here').setRequired(true)),
 
 
-    async execute(interaction,client) {
+    async execute(interaction) {
 
         myId = interaction.user.id;
         userId = interaction.options.get('user').value;
@@ -23,16 +23,16 @@ module.exports = {
         reason = interaction.options.get('reason').value;
         if (myId === userId) {
             const title = 'You cannot send coins to yourself'
-            return responseCommand(client, interaction, title, null, null, true);
+            return responseCommand( interaction, title, null, null, true);
 
         }
         if (amountToTransfer == 0) {
             const title = "Amount must be non-zero and positive"
-            return responseCommand(client, interaction, title, null, null, true);
+            return responseCommand( interaction, title, null, null, true);
 
         } else if (amountToTransfer < 0) {
             const title = "Amount should be positive integer"
-            return responseCommand(client, interaction, title, null, null, true);
+            return responseCommand( interaction, title, null, null, true);
 
         }
         sender = await findUser(myId);
@@ -40,28 +40,28 @@ module.exports = {
         if (sender !== null && reciever !== null) {
             if (sender.coins < amountToTransfer) {
                 const title = "You don't have enough coins"
-                return responseCommand(client, interaction, title, null, null, true);
+                return responseCommand( interaction, title, null, null, true);
             }
             else {
                 transferCoins(myId, userId, amountToTransfer, sender.name, reciever.name, reason)
                 if (amountToTransfer == 1) {
                     const description = `<@${myId}> ` + `transfered **${amountToTransfer} coin** to ` + `<@${userId}>\n**Reason** : ${reason}`
-                    responseCommand(client, interaction, 'Coin Transfered !', fields, description, false)
+                    responseCommand( interaction, 'Coin Transfered !', fields, description, false)
                     return interaction.channel.send(`<@${PermissionToAddCoins}>`);
                 } else {
                     const title = 'Coins Transfered !'
                     const description = `<@${myId}> ` + `transfered **${amountToTransfer} coins** to ` + `<@${userId}>\n**Reason** : ${reason}`
-                    responseCommand(client, interaction, title, null, description, false)
+                    responseCommand( interaction, title, null, description, false)
                     return interaction.channel.send(`<@${PermissionToAddCoins}>`);
                 }
 
             }
         } else if (sender == null) {
-            return responseCommand(client, interaction, null, null, "You do not have a wallet", false);
+            return responseCommand( interaction, null, null, "You do not have a wallet", false);
         } else if (reciever == null) {
-            return responseCommand(client, interaction, null, null, "User does not have a wallet", false);
+            return responseCommand(interaction, null, null, "User does not have a wallet", false);
         } else {
-            return responseCommand(client, interaction, null, null, "Something went wrong", false)
+            return responseCommand( interaction, null, null, "Something went wrong", false)
         }
 
     },

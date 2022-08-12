@@ -10,7 +10,7 @@ module.exports = {
 	.addStringOption(option => option.setName('email').setDescription('Enter your email address').setRequired(true))
 	.addStringOption(option => option.setName('introduction').setDescription('Enter your introduction here').setRequired(true)),
     
-    async execute(interaction,client) {
+    async execute(interaction) {
 
         const name = interaction.options.get('name').value;
         const email = interaction.options.get('email').value;
@@ -30,7 +30,7 @@ module.exports = {
         const fields = [
             { name: 'Introduction', value: `${introduction}`, inline: true },
         ]
-        const introductionEmbed = embedCommand(client, Title, fields, description);
+        const introductionEmbed = embedCommand(interaction, Title, fields, description);
 
         return interaction.reply({ embeds: [introductionEmbed], ephemeral: false });
     }
