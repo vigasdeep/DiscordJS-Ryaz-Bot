@@ -14,10 +14,10 @@ module.exports = {
             { name: '/createwallet', value: `Creates user and Coin wallet`, inline: true },
             { name: '/mycoins', value: `Shows Available Coins`, inline: true },
             { name: '/sendcoins', value: `Transfer your coins to other user`, inline: true },
-            { name: '/showhistory', value: `Shows All coin transfer history`, inline: true },
-            { name: '/introduce', value: `Shows All coin transfer history`, inline: true },
+            { name: '/showhistory', value: `Shows all coin transfer history`, inline: true },
+            { name: '/introduce', value: `Registers user's introduction`, inline: true },
             { name: '/findintroduction', value: `Gives user's introduction`, inline: true }]
-            const description = `Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`
+            const description = `Server name: ${interaction.guild.name}\n`
             return responseCommand(interaction, 'Help', fields, description, false);
 
 	},
