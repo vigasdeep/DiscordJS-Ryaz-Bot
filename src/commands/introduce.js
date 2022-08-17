@@ -1,5 +1,5 @@
-const { getDateAndTime } = require('../functions/mongoDbCoins');
-const { introductionObject, } = require('../functions/mongoDbIntroduction');
+const { getDateAndTime, findUser } = require('../functions/mongoDbCoins');
+const { introductionObject, findUserInfo, updateIntroData} = require('../functions/mongoDbIntroduction');
 const { SlashCommandBuilder } = require('discord.js');
 const { embedCommand } = require('../functions/embed');
 
@@ -12,20 +12,26 @@ module.exports = {
     
     async execute(interaction) {
 
+        const user = findUserInfo(interaction.user.id);
+
         const name = interaction.options.get('name').value;
         const email = interaction.options.get('email').value;
         const introduction = interaction.options.get('introduction').value;
-
-        const person = new introductionObject({
-            name: name,
-            discordid: interaction.user.id,
-            email: email,
-            information: introduction,
-            date: getDateAndTime()
-        })
-        person.save()
-
-        const Title = `Introduction of ${person.name}`
+        const date = getDateAndTime();
+        if(user !== null){
+            updateIntroData(interaction.user.id,name,email,introduction,date)
+        }else{
+            const person = new introductionObject({
+                name: name,
+                discordid: interaction.user.id,
+                email: email,
+                information: introduction,
+                date: getDateAndTime()
+            })
+            person.save()
+        }
+        
+        const Title = `Introduction of ${name}`
         const description = `Email : ${email}`
         const fields = [
             { name: 'Introduction', value: `${introduction}`, inline: true },

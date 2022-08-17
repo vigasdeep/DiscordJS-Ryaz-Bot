@@ -10,13 +10,13 @@ const welcomeChannelId = process.env.WELCOME_CHANNEL_ID;
 module.exports = {
     name: 'messageCreate',
     async execute(msg,client) {
-        
+        client = msg.client;
     if (msg.author.bot) return;
     let isWelcomeMessage = msg.type === 7
 
     if (isWelcomeMessage) {
         const Title = `Welcome ${msg.author.username}`
-        const description = `Please type !introduce to give your introduction`
+        const description = `Please use /introduce to give your introduction`
         const introductionEmbed = messageEmbedCommand(msg, Title, null, description);
         client.channels.cache.get(welcomeChannelId).send({ embeds: [introductionEmbed], ephemeral: true })
         client.channels.cache.get(welcomeChannelId).send(`<@${msg.author.id}>`);

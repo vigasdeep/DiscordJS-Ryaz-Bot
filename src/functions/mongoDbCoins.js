@@ -68,7 +68,7 @@ async function addCoinsToAll(amount){
  const query =  { recieveCoins: true};
  const elementToPush = `Added: ${amount} coins on ${time}`;
  await EmployeeData.updateMany(query,{$inc: { coins: amount}});
- await EmployeeData.findOneAndUpdate(query, {$push: { addcoinsLogs: elementToPush }});
+ await EmployeeData.updateMany(query, {$push: { addcoinsLogs: elementToPush }});
  sentTo = await EmployeeData.find(query);
  return sentTo;
 }

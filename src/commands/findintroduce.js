@@ -25,7 +25,7 @@ module.exports = {
                 return interaction.reply({ embeds: [introductionEmbed], ephemeral: true });
             } else {
                 const Title = `Find Information command`;
-                const description = `**Name** : ${person.name}\n**Email**:${person.email}\n**Introduction**: ${person.information}\n**Created on**: ${person.date}`;
+                const description = `**Name** : ${person.name}\n**Email**: ${person.email}\n**Introduction**: ${person.information}\n**Created on**: ${person.date}`;
                 const introductionEmbed = embedCommand(interaction, Title, null, description);
                 return interaction.reply({ embeds: [introductionEmbed], ephemeral: true });
             }

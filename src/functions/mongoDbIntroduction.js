@@ -16,8 +16,16 @@ async function findUserInfo(id){
     return model
 }
 
+async function updateIntroData(id,name,email,information,date){
+    const query = { discordid: id };
+    await introductionObject.findOneAndUpdate(query,{$set:{name:name}});
+    await introductionObject.findOneAndUpdate(query,{$set:{email:email}});
+    await introductionObject.findOneAndUpdate(query,{$set:{information:information}});
+    await introductionObject.findOneAndUpdate(query,{$set:{date:date}});
+}
 
 module.exports = {
     introductionObject:introductionObject,
     findUserInfo:findUserInfo,
+    updateIntroData:updateIntroData,
 };  
